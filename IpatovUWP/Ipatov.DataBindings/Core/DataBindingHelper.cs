@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 
 namespace Ipatov.DataBindings
 {
@@ -39,9 +40,28 @@ namespace Ipatov.DataBindings
         /// <param name="source">Parent event source.</param>
         /// <param name="getChildFunc">Child event source factory.</param>
         /// <returns>Event source.</returns>
-        public static IDataBindingEventSource Child(this IDataBindingEventSource source, Func<object, IDataBindingEventSource> getChildFunc)
+        public static IDataBindingEventSource OnChild(this IDataBindingEventSource source, Func<object, IDataBindingEventSource> getChildFunc)
         {
             return new DataBindingChildEventSource(source, () => getChildFunc?.Invoke(source.BoundObject));
+        }
+
+        /// <summary>
+        /// Get child event source for INotifyPropertyChanged.
+        /// </summary>
+        /// <param name="source">Source.</param>
+        /// <param name="propertyName">Property name.</param>
+        /// <returns>Event source.</returns>
+        public static IDataBindingEventSource OnChildPropertyChanged(this IDataBindingEventSource source, string propertyName)
+        {
+            return new DataBindingChildEventSource(source, () =>
+            {
+                var ps = source.BoundObject as INotifyPropertyChanged;
+                if (ps == null)
+                {
+                    return null;
+                }
+                return new DataBindingPropertyChangedEventSource(ps, propertyName);
+            });
         }
     }
 }
