@@ -107,6 +107,24 @@
     <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Core\DataBinding.cs" />
+    <Compile Include="Core\DataBindingDelegatedEventCallback.cs" />
+    <Compile Include="Core\DataBindingEventSourceBase.cs" />
+    <Compile Include="Core\DataBindingChildEventSource.cs" />
+    <Compile Include="Core\DataBindingHelper.cs" />
+    <Compile Include="Core\DataBindingOnUiThreadValueAccessWrapper.cs" />
+    <Compile Include="Core\DataBindingPropertyChangedEventSource.cs" />
+    <Compile Include="Core\DataBindingSource.cs" />
+    <Compile Include="Core\DataBindingValueAccessWrapper.cs" />
+    <Compile Include="Core\DataBindingValueHelper.cs" />
+    <Compile Include="Core\DataBindingValueAccessTransformer.cs" />
+    <Compile Include="Core\IDataBinding.cs" />
+    <Compile Include="Core\IDataBindingAccessor.cs" />
+    <Compile Include="Core\IDataBindingEventCallback.cs" />
+    <Compile Include="Core\IDataBindingEventSource.cs" />
+    <Compile Include="Core\IDataBindingSource.cs" />
+    <Compile Include="Core\IDataBindingValueGetter.cs" />
+    <Compile Include="Core\IDataBindingValueSetter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Properties\Ipatov.DataBindings.rd.xml" />
   </ItemGroup>
