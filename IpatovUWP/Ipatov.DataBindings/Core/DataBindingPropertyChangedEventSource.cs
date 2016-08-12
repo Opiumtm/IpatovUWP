@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Threading;
 
 namespace Ipatov.DataBindings
 {
@@ -38,13 +39,18 @@ namespace Ipatov.DataBindings
             };
         }
 
+        private int _isDisposed;
+
         protected override void OnDispose()
         {
             base.OnDispose();
-            var source = BoundObject as INotifyPropertyChanged;
-            if (source != null)
+            if (Interlocked.Exchange(ref _isDisposed, 1) == 0)
             {
-                source.PropertyChanged -= _handler;
+                var source = BoundObject as INotifyPropertyChanged;
+                if (source != null)
+                {
+                    source.PropertyChanged -= _handler;
+                }
             }
         }
 
