@@ -29,8 +29,8 @@ namespace Ipatov.DataBindings
             _parent = parent;
             _getBoundObject = getBoundObject;
             _getEventSource = getEventSource;
-            _parent?.AddCallback(new DataBindingDelegatedEventCallback(UpdateWrappedSource));
-            UpdateWrappedSource();
+            _parent?.AddCallback(new DataBindingDelegatedEventCallback(() => UpdateWrappedSource(false)));
+            UpdateWrappedSource(true);
         }
 
         /// <summary>
@@ -55,12 +55,16 @@ namespace Ipatov.DataBindings
             }
         } 
 
-        private void UpdateWrappedSource()
+        private void UpdateWrappedSource(bool isFirst)
         {
             var newSource = _getEventSource(_getBoundObject(_parent?.BoundObject));
-            var oldSource = Interlocked.Exchange(ref _wrappedSource, newSource);
             newSource?.AddCallback(new DataBindingDelegatedEventCallback(Trigger));
+            var oldSource = Interlocked.Exchange(ref _wrappedSource, newSource);
             oldSource?.Dispose();
+            if (!isFirst)
+            {
+                Trigger();
+            }
         }
 
         /// <summary>

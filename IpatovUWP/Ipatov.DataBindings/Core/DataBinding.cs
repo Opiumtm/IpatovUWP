@@ -6,7 +6,7 @@ namespace Ipatov.DataBindings
     /// Data binding.
     /// </summary>
     /// <typeparam name="T">Value type.</typeparam>
-    public sealed class DataBinding<T> : IDataBinding<T>, IDataBindingEventCallback
+    public sealed class DataBinding<T> : IDataBinding, IDataBindingEventCallback
     {
         private readonly IDataBindingEventSource _eventSource;
 

@@ -5,19 +5,8 @@ namespace Ipatov.DataBindings
     /// <summary>
     /// Data binding.
     /// </summary>
-    /// <typeparam name="T">Value type.</typeparam>
-    public interface IDataBinding<T> : IDisposable
+    public interface IDataBinding : IDisposable
     {
-        /// <summary>
-        /// Bound source.
-        /// </summary>
-        IDataBindingValueGetter<T> Source { get; }
-
-        /// <summary>
-        /// Bound target.
-        /// </summary>
-        IDataBindingValueSetter<T> Target { get; }
-
         /// <summary>
         /// Trigger data binding.
         /// </summary>

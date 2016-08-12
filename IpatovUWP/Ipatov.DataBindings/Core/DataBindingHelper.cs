@@ -27,7 +27,7 @@ namespace Ipatov.DataBindings
         /// <param name="source">Data binding source.</param>
         /// <param name="target">Data binding target.</param>
         /// <returns></returns>
-        public static IDataBinding<T> BindTo<T>(this IDataBindingSource<T> source, IDataBindingValueSetter<T> target)
+        public static IDataBinding BindTo<T>(this IDataBindingSource<T> source, IDataBindingValueSetter<T> target)
         {
             if (source == null) throw new ArgumentNullException(nameof(source));
             if (target == null) throw new ArgumentNullException(nameof(target));
