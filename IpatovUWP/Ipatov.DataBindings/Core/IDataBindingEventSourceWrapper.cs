@@ -3,7 +3,8 @@
     /// <summary>
     /// Marker interface for wrapped binding event sources.
     /// </summary>
-    public interface IDataBindingEventSourceWrapper : IDataBindingEventSource
+    /// <typeparam name="T">Bound object type.</typeparam>
+    public interface IDataBindingEventSourceWrapper<out T> : IDataBindingEventSource<T>
     {        
     }
 }

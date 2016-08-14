@@ -5,7 +5,8 @@ namespace Ipatov.DataBindings
     /// <summary>
     /// Data binding event source.
     /// </summary>
-    public interface IDataBindingEventSource : IDisposable
+    /// <typeparam name="T">Bound object type.</typeparam>
+    public interface IDataBindingEventSource<out T> : IDisposable
     {
         /// <summary>
         /// Add data binding callback.
@@ -24,6 +25,6 @@ namespace Ipatov.DataBindings
         /// <summary>
         /// Bound object.
         /// </summary>
-        object BoundObject { get; }
+        T BoundObject { get; }
     }
 }

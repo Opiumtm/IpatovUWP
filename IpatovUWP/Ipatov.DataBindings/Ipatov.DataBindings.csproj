@@ -109,9 +109,10 @@
   <ItemGroup>
     <Compile Include="Core\DataBinding.cs" />
     <Compile Include="Core\DataBindingDelegatedEventCallback.cs" />
+    <Compile Include="Core\DataBindingDependencyPropertyChangedEventSource.cs" />
     <Compile Include="Core\DataBindingEventSourceBase.cs" />
-    <Compile Include="Core\DataBindingChildEventSource.cs" />
     <Compile Include="Core\DataBindingEventSourceWrapper.cs" />
+    <Compile Include="Core\DataBindingFallbackValueAccess.cs" />
     <Compile Include="Core\DataBindingGroup.cs" />
     <Compile Include="Core\DataBindingHelper.cs" />
     <Compile Include="Core\DataBindingOnUiThreadValueAccessWrapper.cs" />
@@ -120,6 +121,7 @@
     <Compile Include="Core\DataBindingValueAccessWrapper.cs" />
     <Compile Include="Core\DataBindingValueHelper.cs" />
     <Compile Include="Core\DataBindingValueAccessTransformer.cs" />
+    <Compile Include="Core\DataBindingWeakEventSourceBase.cs" />
     <Compile Include="Core\IDataBinding.cs" />
     <Compile Include="Core\IDataBindingAccessor.cs" />
     <Compile Include="Core\IDataBindingEventCallback.cs" />

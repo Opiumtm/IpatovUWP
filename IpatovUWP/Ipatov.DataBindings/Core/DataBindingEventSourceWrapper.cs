@@ -6,15 +6,17 @@ namespace Ipatov.DataBindings
     /// <summary>
     /// Wrapper for dynamic data binding event source.
     /// </summary>
-    public sealed class DataBindingEventSourceWrapper : DataBindingEventSourceBase, IDataBindingEventSourceWrapper
+    /// <typeparam name="TParent">Parent object type.</typeparam>
+    /// <typeparam name="T">Bound object type.</typeparam>
+    public sealed class DataBindingEventSourceWrapper<TParent, T> : DataBindingEventSourceBase<T>, IDataBindingEventSourceWrapper<T>
     {
-        private readonly IDataBindingEventSource _parent;
+        private readonly IDataBindingEventSource<TParent> _parent;
 
-        private readonly Func<object, object> _getBoundObject;
+        private readonly Func<TParent, T> _getBoundObject;
 
-        private readonly Func<object, IDataBindingEventSource> _getEventSource;
+        private readonly Func<T, IDataBindingEventSource<T>> _getEventSource;
 
-        private IDataBindingEventSource _wrappedSource;
+        private IDataBindingEventSource<T> _wrappedSource;
 
         /// <summary>
         /// Constructor.
@@ -22,7 +24,7 @@ namespace Ipatov.DataBindings
         /// <param name="parent">Parent.</param>
         /// <param name="getBoundObject">Get bound object function.</param>
         /// <param name="getEventSource">Event source factory function.</param>
-        public DataBindingEventSourceWrapper(IDataBindingEventSource parent, Func<object, object> getBoundObject, Func<object, IDataBindingEventSource> getEventSource)
+        public DataBindingEventSourceWrapper(IDataBindingEventSource<TParent> parent, Func<TParent, T> getBoundObject, Func<T, IDataBindingEventSource<T>> getEventSource)
         {
             if (getBoundObject == null) throw new ArgumentNullException(nameof(getBoundObject));
             if (getEventSource == null) throw new ArgumentNullException(nameof(getEventSource));
@@ -38,7 +40,7 @@ namespace Ipatov.DataBindings
         /// </summary>
         /// <param name="getBoundObject">Get bound object function.</param>
         /// <param name="getEventSource">Event source factory function.</param>
-        public DataBindingEventSourceWrapper(Func<object, object> getBoundObject, Func<object, IDataBindingEventSource> getEventSource)
+        public DataBindingEventSourceWrapper(Func<TParent, T> getBoundObject, Func<T, IDataBindingEventSource<T>> getEventSource)
             :this(null, getBoundObject, getEventSource)
         {
         }
@@ -46,18 +48,18 @@ namespace Ipatov.DataBindings
         /// <summary>
         /// Bound object.
         /// </summary>
-        public override object BoundObject
+        public override T BoundObject
         {
             get
             {
                 var obj = Interlocked.CompareExchange(ref _wrappedSource, null, null);
-                return obj?.BoundObject;
+                return obj != null ? obj.BoundObject : default(T);
             }
         } 
 
         private void UpdateWrappedSource(bool isFirst)
         {
-            var newSource = _getEventSource(_getBoundObject(_parent?.BoundObject));
+            var newSource = _getEventSource(_getBoundObject(_parent != null ? _parent.BoundObject : default(TParent)));
             newSource?.AddCallback(new DataBindingDelegatedEventCallback(Trigger));
             var oldSource = Interlocked.Exchange(ref _wrappedSource, newSource);
             oldSource?.Dispose();

@@ -10,14 +10,14 @@ namespace Ipatov.DataBindings
     {
         private readonly IDataBindingValueGetter<T> _valueGetter;
 
-        private readonly IDataBindingEventSource _eventSource;
+        private readonly IDataBindingEventSource<T> _eventSource;
 
         /// <summary>
         /// Constructor.
         /// </summary>
         /// <param name="valueGetter">Value getter.</param>
         /// <param name="eventSource">Event source.</param>
-        public DataBindingSource(IDataBindingValueGetter<T> valueGetter, IDataBindingEventSource eventSource = null)
+        public DataBindingSource(IDataBindingValueGetter<T> valueGetter, IDataBindingEventSource<T> eventSource = null)
         {
             if (valueGetter == null) throw new ArgumentNullException(nameof(valueGetter));
             _valueGetter = valueGetter;
@@ -57,7 +57,7 @@ namespace Ipatov.DataBindings
         /// <summary>
         /// Bound object.
         /// </summary>
-        public object BoundObject => _eventSource?.BoundObject;
+        public T BoundObject => _eventSource != null ? _eventSource.BoundObject : default(T);
 
         /// <summary>
         /// Dispose.

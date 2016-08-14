@@ -7,28 +7,31 @@ namespace Ipatov.DataBindings
     /// <summary>
     /// INotifyPropertyChanged event source.
     /// </summary>
-    public sealed class DataBindingPropertyChangedEventSource : DataBindingEventSourceBase
+    /// <typeparam name="T">Bound object type</typeparam>
+    public sealed class DataBindingPropertyChangedEventSource<T> : DataBindingWeakEventSourceBase<T> where T : class, INotifyPropertyChanged
     {
-        private readonly WeakReference<INotifyPropertyChanged> _handle;
-
         private readonly string _property;
 
         private readonly PropertyChangedEventHandler _handler;
 
-        public DataBindingPropertyChangedEventSource(INotifyPropertyChanged source, string property)
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="source">Source object.</param>
+        /// <param name="property">Property name.</param>
+        public DataBindingPropertyChangedEventSource(T source, string property)
+            :base(source)
         {
-            if (source == null) throw new ArgumentNullException(nameof(source));
-            _handle = new WeakReference<INotifyPropertyChanged>(source);
             _property = property;
-            _handler = CreateHandler(new WeakReference<DataBindingPropertyChangedEventSource>(this));
+            _handler = CreateHandler(new WeakReference<DataBindingPropertyChangedEventSource<T>>(this));
             source.PropertyChanged += _handler;
         }
 
-        private static PropertyChangedEventHandler CreateHandler(WeakReference<DataBindingPropertyChangedEventSource> handle)
+        private static PropertyChangedEventHandler CreateHandler(WeakReference<DataBindingPropertyChangedEventSource<T>> handle)
         {
             return (sender, e) =>
             {
-                DataBindingPropertyChangedEventSource obj;
+                DataBindingPropertyChangedEventSource<T> obj;
                 if (handle.TryGetTarget(out obj))
                 {
                     if (obj._property == e.PropertyName || e.PropertyName == null)
@@ -46,27 +49,11 @@ namespace Ipatov.DataBindings
             base.OnDispose();
             if (Interlocked.Exchange(ref _isDisposed, 1) == 0)
             {
-                var source = BoundObject as INotifyPropertyChanged;
+                var source = BoundObject;
                 if (source != null)
                 {
                     source.PropertyChanged -= _handler;
                 }
-            }
-        }
-
-        /// <summary>
-        /// Bound object.
-        /// </summary>
-        public override object BoundObject
-        {
-            get
-            {
-                INotifyPropertyChanged obj;
-                if (_handle.TryGetTarget(out obj))
-                {
-                    return obj;
-                }
-                return null;
             }
         }
     }

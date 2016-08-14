@@ -140,5 +140,18 @@ namespace Ipatov.DataBindings
                 v => (TOut) valueConverter.Convert(v, typeof (TOut), parameter, language ?? System.Globalization.CultureInfo.CurrentCulture.Name),
                 v => (TIn) valueConverter.ConvertBack(v, typeof (TIn), parameter, language ?? System.Globalization.CultureInfo.CurrentCulture.Name));
         }
+
+        /// <summary>
+        /// Add fallback value.
+        /// </summary>
+        /// <typeparam name="T">Value type.</typeparam>
+        /// <param name="source">Source data accessor.</param>
+        /// <param name="fallbackValue">Fallback value.</param>
+        /// <returns></returns>
+        public static IDataBindingAccessor<T> Fallback<T>(this IDataBindingAccessor<T> source,
+            T fallbackValue = default(T))
+        {
+            return new DataBindingFallbackValueAccess<T>(source, fallbackValue);
+        }
     }
 }
