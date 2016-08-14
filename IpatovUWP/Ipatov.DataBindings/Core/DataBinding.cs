@@ -18,6 +18,7 @@ namespace Ipatov.DataBindings
         public void Dispose()
         {
             _eventSource?.RemoveCallback(_callbackId);
+            _eventSource?.Dispose();
         }
 
         /// <summary>
@@ -78,7 +79,7 @@ namespace Ipatov.DataBindings
         /// <summary>
         /// Receive data binding event.
         /// </summary>
-        public void OnDataBindingEvent()
+        void IDataBindingEventCallback.OnDataBindingEvent()
         {
             Trigger();
         }

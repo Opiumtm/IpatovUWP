@@ -18,6 +18,8 @@ namespace Ipatov.DataBindings
 
         private IDataBindingEventSource<T> _wrappedSource;
 
+        private readonly Guid _callbackId;
+
         /// <summary>
         /// Constructor.
         /// </summary>
@@ -31,7 +33,7 @@ namespace Ipatov.DataBindings
             _parent = parent;
             _getBoundObject = getBoundObject;
             _getEventSource = getEventSource;
-            _parent?.AddCallback(new DataBindingDelegatedEventCallback(() => UpdateWrappedSource(false)));
+            _callbackId = _parent?.AddCallback(new DataBindingDelegatedEventCallback(() => UpdateWrappedSource(false))) ?? Guid.Empty;
             UpdateWrappedSource(true);
         }
 
@@ -77,6 +79,7 @@ namespace Ipatov.DataBindings
             base.OnDispose();
             var source = Interlocked.CompareExchange(ref _wrappedSource, null, null);
             source?.Dispose();
+            _parent?.RemoveCallback(_callbackId);
             _parent?.Dispose();
         }
     }
