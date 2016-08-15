@@ -5,21 +5,11 @@ namespace Ipatov.DataBindings
     /// <summary>
     /// Data binding.
     /// </summary>
-    public interface IDataBinding : IDisposable
+    public interface IDataBinding : IDataBindingStatusEvents, IDisposable
     {
         /// <summary>
         /// Trigger data binding.
         /// </summary>
         void Trigger();
-
-        /// <summary>
-        /// Data binding error.
-        /// </summary>
-        event EventHandler<Exception> Error;
-
-        /// <summary>
-        /// Data transfer success.
-        /// </summary>
-        event EventHandler Success;
     }
 }

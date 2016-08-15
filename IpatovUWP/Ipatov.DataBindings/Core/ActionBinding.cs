@@ -5,10 +5,9 @@ namespace Ipatov.DataBindings
     /// <summary>
     /// Action binding.
     /// </summary>
-    /// <typeparam name="T">Bound object type.</typeparam>
-    public sealed class ActionBinding<T> : IDataBinding, IDataBindingEventCallback
+    public sealed class ActionBinding : IDataBinding, IDataBindingEventCallback
     {
-        private readonly IDataBindingEventSource<T> _eventSource;
+        private readonly IDataBindingEventSource _eventSource;
 
         private readonly Guid _callbackId;
 
@@ -19,7 +18,7 @@ namespace Ipatov.DataBindings
         /// </summary>
         /// <param name="eventSource">Event source.</param>
         /// <param name="action">Action.</param>
-        public ActionBinding(IDataBindingEventSource<T> eventSource, Action action)
+        public ActionBinding(IDataBindingEventSource eventSource, Action action)
         {
             if (eventSource == null) throw new ArgumentNullException(nameof(eventSource));
             _action = action;

@@ -6,7 +6,7 @@ namespace Ipatov.DataBindings
     /// Event source base with weak reference to bound object.
     /// </summary>
     /// <typeparam name="T">Bound object type.</typeparam>
-    public abstract class DataBindingWeakEventSourceBase<T> : DataBindingEventSourceBase<T> where T : class
+    public abstract class DataBindingWeakEventSourceBase<T> : DataBindingEventSourceBase where T : class
     {
         private readonly WeakReference<T> _handle;
 
@@ -28,7 +28,7 @@ namespace Ipatov.DataBindings
         /// <summary>
         /// Bound object.
         /// </summary>
-        public override T BoundObject
+        protected T BoundObject
         {
             get
             {

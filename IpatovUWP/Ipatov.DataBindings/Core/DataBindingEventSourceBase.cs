@@ -6,8 +6,7 @@ namespace Ipatov.DataBindings
     /// <summary>
     /// Data binding event source base.
     /// </summary>
-    /// <typeparam name="T">Bound object type.</typeparam>
-    public abstract class DataBindingEventSourceBase<T> : IDataBindingEventSource<T>
+    public abstract class DataBindingEventSourceBase : IDataBindingEventSource
     {
         private readonly ConcurrentDictionary<Guid, IDataBindingEventCallback> _callbacks = new ConcurrentDictionary<Guid, IDataBindingEventCallback>();
 
@@ -37,11 +36,6 @@ namespace Ipatov.DataBindings
             IDataBindingEventCallback obj;
             _callbacks.TryRemove(callbackToken, out obj);
         }
-
-        /// <summary>
-        /// Bound object.
-        /// </summary>
-        public abstract T BoundObject { get; }
 
         /// <summary>
         /// Remove all registered callbacks.
