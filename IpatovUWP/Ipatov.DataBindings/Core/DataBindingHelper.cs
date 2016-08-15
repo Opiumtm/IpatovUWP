@@ -13,26 +13,52 @@ namespace Ipatov.DataBindings
         /// Add event source to value getter.
         /// </summary>
         /// <typeparam name="T">Value type.</typeparam>
+        /// <typeparam name="TSrc">Bound object type.</typeparam>
         /// <param name="source">Value getter.</param>
         /// <param name="eventSource">Event source.</param>
         /// <returns>Binding source.</returns>
-        public static IDataBindingSource<T> AsBindingSource<T>(this IDataBindingValueGetter<T> source, IDataBindingEventSource<T> eventSource = null)
+        public static IDataBindingSource<T, TSrc> AsBindingSource<T, TSrc>(this IDataBindingValueGetter<T> source, IDataBindingEventSource<TSrc> eventSource = null)
         {
-            return new DataBindingSource<T>(source, eventSource);
+            return new DataBindingSource<T, TSrc>(source, eventSource);
         }
 
         /// <summary>
         /// Bind data source to traget.
         /// </summary>
         /// <typeparam name="T">Value type.</typeparam>
+        /// <typeparam name="TSrc">Bound object type.</typeparam>
         /// <param name="source">Data binding source.</param>
         /// <param name="target">Data binding target.</param>
         /// <returns>Data binding.</returns>
-        public static IDataBinding BindTo<T>(this IDataBindingSource<T> source, IDataBindingValueSetter<T> target)
+        public static IDataBinding BindTo<T, TSrc>(this IDataBindingSource<T, TSrc> source, IDataBindingValueSetter<T> target)
         {
             if (source == null) throw new ArgumentNullException(nameof(source));
             if (target == null) throw new ArgumentNullException(nameof(target));
-            return new DataBinding<T>(source, target, source);
+            return new DataBinding<T, TSrc>(source, target, source);
+        }
+
+        /// <summary>
+        /// Bind action to event.
+        /// </summary>
+        /// <typeparam name="T">Bound object type.</typeparam>
+        /// <param name="source">Event source.</param>
+        /// <param name="action">Action.</param>
+        /// <returns>Data binding.</returns>
+        public static IDataBinding Action<T>(this IDataBindingEventSource<T> source, Action action)
+        {
+            return new ActionBinding<T>(source, action);
+        }
+
+        /// <summary>
+        /// Bind action to event.
+        /// </summary>
+        /// <typeparam name="T">Bound object type.</typeparam>
+        /// <param name="source">Event source.</param>
+        /// <param name="action">Action.</param>
+        /// <returns>Data binding.</returns>
+        public static IDataBinding Action<T>(this IDataBindingEventSource<T> source, Action<T> action)
+        {
+            return new BoundActionBinding<T>(source, action);
         }
 
         /// <summary>

@@ -6,18 +6,19 @@ namespace Ipatov.DataBindings
     /// Data binding source.
     /// </summary>
     /// <typeparam name="T">Value type.</typeparam>
-    public sealed class DataBindingSource<T> : IDataBindingSource<T>
+    /// <typeparam name="TSrc">Bound object type.</typeparam>
+    public sealed class DataBindingSource<T, TSrc> : IDataBindingSource<T, TSrc>
     {
         private readonly IDataBindingValueGetter<T> _valueGetter;
 
-        private readonly IDataBindingEventSource<T> _eventSource;
+        private readonly IDataBindingEventSource<TSrc> _eventSource;
 
         /// <summary>
         /// Constructor.
         /// </summary>
         /// <param name="valueGetter">Value getter.</param>
         /// <param name="eventSource">Event source.</param>
-        public DataBindingSource(IDataBindingValueGetter<T> valueGetter, IDataBindingEventSource<T> eventSource = null)
+        public DataBindingSource(IDataBindingValueGetter<T> valueGetter, IDataBindingEventSource<TSrc> eventSource = null)
         {
             if (valueGetter == null) throw new ArgumentNullException(nameof(valueGetter));
             _valueGetter = valueGetter;
@@ -57,7 +58,7 @@ namespace Ipatov.DataBindings
         /// <summary>
         /// Bound object.
         /// </summary>
-        public T BoundObject => _eventSource != null ? _eventSource.BoundObject : default(T);
+        public TSrc BoundObject => _eventSource != null ? _eventSource.BoundObject : default(TSrc);
 
         /// <summary>
         /// Dispose.

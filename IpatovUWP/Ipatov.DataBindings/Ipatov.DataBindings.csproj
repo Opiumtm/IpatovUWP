@@ -107,6 +107,8 @@
     <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Core\ActionBinding.cs" />
+    <Compile Include="Core\BoundActionBinding.cs" />
     <Compile Include="Core\DataBinding.cs" />
     <Compile Include="Core\DataBindingDelegatedEventCallback.cs" />
     <Compile Include="Core\DataBindingDependencyPropertyChangedEventSource.cs" />

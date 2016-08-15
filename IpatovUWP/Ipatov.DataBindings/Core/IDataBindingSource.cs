@@ -4,7 +4,8 @@
     /// Data binding source.
     /// </summary>
     /// <typeparam name="T">Value type.</typeparam>
-    public interface IDataBindingSource<out T> : IDataBindingValueGetter<T>, IDataBindingEventSource<T>
+    /// <typeparam name="TSrc">Bound object type.</typeparam>
+    public interface IDataBindingSource<out T, out TSrc> : IDataBindingValueGetter<T>, IDataBindingEventSource<TSrc>
     {         
     }
 }
