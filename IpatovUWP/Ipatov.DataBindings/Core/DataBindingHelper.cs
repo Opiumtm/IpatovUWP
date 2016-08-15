@@ -113,7 +113,7 @@ namespace Ipatov.DataBindings
         /// <returns>Event source.</returns>
         public static IDataBindingSource<T> OnProperty<TSrc, T>(this TSrc source, Func<TSrc, T> getValue, string propertyName) where TSrc : class, INotifyPropertyChanged
         {
-            return new DataBindingSource<T>(source.WeakValueAccessor(getValue), new DataBindingPropertyChangedEventSource<TSrc>(source, propertyName));
+            return source.WeakValueAccessor(getValue).AsBindingSource(new DataBindingPropertyChangedEventSource<TSrc>(source, propertyName));
         }
 
         /// <summary>
@@ -127,7 +127,7 @@ namespace Ipatov.DataBindings
         public static IDataBindingSource<T> OnProperty<TSrc, T>(this TSrc source, DependencyProperty property)
             where TSrc : DependencyObject
         {
-            return new DataBindingSource<T>(source.WeakValueAccessor(v => (T)v.GetValue(property)).OnUiThread(), new DataBindingDependencyPropertyChangedEventSource<TSrc>(source, property));
+            return source.WeakValueAccessor(v => (T) v.GetValue(property)).OnUiThread().AsBindingSource(new DataBindingDependencyPropertyChangedEventSource<TSrc>(source, property));
         }
     }
 }
