@@ -36,6 +36,17 @@ namespace Ipatov.DataBindings
         }
 
         /// <summary>
+        /// Attach binding to group for centralized update and dispose.
+        /// </summary>
+        /// <param name="binding">Data binding.</param>
+        /// <param name="group">Group.</param>
+        public static void Attach(this IDataBinding binding, IDataBindingGroup group)
+        {
+            if (@group == null) throw new ArgumentNullException(nameof(@group));
+            group.AddBinding(binding);
+        }
+
+        /// <summary>
         /// Bind action to event.
         /// </summary>
         /// <typeparam name="T">Bound object type.</typeparam>
