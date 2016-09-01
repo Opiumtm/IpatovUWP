@@ -113,6 +113,25 @@
     <Compile Include="Attributes\ITextAttributeState.cs" />
     <Compile Include="Attributes\TextAttribute.cs" />
     <Compile Include="Attributes\TextAttributeState.cs" />
+    <Compile Include="Commands\CommonRenderContentTypes.cs" />
+    <Compile Include="Commands\IRenderCommand.cs" />
+    <Compile Include="Commands\IRenderCommandsSource.cs" />
+    <Compile Include="Commands\IRenderContent.cs" />
+    <Compile Include="Commands\IRenderContentText.cs" />
+    <Compile Include="Commands\RenderCommand.cs" />
+    <Compile Include="Commands\RenderLineBreakContent.cs" />
+    <Compile Include="Commands\RenderTextContent.cs" />
+    <Compile Include="Program\AddAttributeRenderProgramElement.cs" />
+    <Compile Include="Program\AttributeRenderProgramElement.cs" />
+    <Compile Include="Program\CommonProgramElements.cs" />
+    <Compile Include="Program\IRenderProgramAttribute.cs" />
+    <Compile Include="Program\IRenderProgramConsumer.cs" />
+    <Compile Include="Program\IRenderProgramElement.cs" />
+    <Compile Include="Program\IRenderProgramText.cs" />
+    <Compile Include="Program\LineBreakRenderProgramElement.cs" />
+    <Compile Include="Program\PrintTextRenderProgramElement.cs" />
+    <Compile Include="Program\RemoveAttributeRenderProgramElement.cs" />
+    <Compile Include="Program\RenderProgramCommandsFormer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Properties\Ipatov.MarkupRender.rd.xml" />
   </ItemGroup>

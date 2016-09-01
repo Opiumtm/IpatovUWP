@@ -3,7 +3,7 @@
     /// <summary>
     /// Common text attributes.
     /// </summary>
-    public class CommonTextAttributes
+    public static class CommonTextAttributes
     {
         /// <summary>
         /// Bold.
