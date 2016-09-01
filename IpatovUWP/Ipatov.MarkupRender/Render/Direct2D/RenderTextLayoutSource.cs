@@ -98,7 +98,7 @@ namespace Ipatov.MarkupRender.Direct2D
             }
         }
 
-        private class IntermediateElement : IMappingHelperArg
+        private sealed class IntermediateElement : IMappingHelperArg
         {
             private IRenderCommand _command;
 
