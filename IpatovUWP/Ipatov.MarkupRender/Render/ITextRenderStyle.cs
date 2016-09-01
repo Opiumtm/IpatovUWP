@@ -19,5 +19,15 @@
         /// Font size.
         /// </summary>
         float FontSize { get; }
+
+        /// <summary>
+        /// Maximum number of lines.
+        /// </summary>
+        int? MaxLines { get; }
+
+        /// <summary>
+        /// Requested width.
+        /// </summary>
+        float Width { get; }
     }
 }

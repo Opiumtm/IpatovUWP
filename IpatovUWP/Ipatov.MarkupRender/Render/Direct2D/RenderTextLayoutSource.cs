@@ -23,7 +23,7 @@ namespace Ipatov.MarkupRender.Direct2D
         /// <param name="width">Requested width</param>
         /// <param name="height">Requested height</param>
         /// <returns>Cavvas text layout.</returns>
-        public IRenderDisposableWrapper<CanvasTextLayout> CreateLayout(IRenderCommandsSource commandsSource, ICanvasResourceCreator resourceCreator, ITextRenderStyle style, float width, float height = 10)
+        public IRenderTextLayoutResult CreateLayout(IRenderCommandsSource commandsSource, ICanvasResourceCreator resourceCreator, ITextRenderStyle style)
         {
             if (commandsSource == null) throw new ArgumentNullException(nameof(commandsSource));
             if (resourceCreator == null) throw new ArgumentNullException(nameof(resourceCreator));
@@ -38,8 +38,8 @@ namespace Ipatov.MarkupRender.Direct2D
                 Direction = CanvasTextDirection.LeftToRightThenTopToBottom,
                 Options = CanvasDrawTextOptions.Default
             };
-            var tl = new CanvasTextLayout(resourceCreator, allText, tf, width, height);
-            var result = new CanvasTextLayoutWrapper(tl, tf);
+            var tl = new CanvasTextLayout(resourceCreator, allText, tf, style.Width, 10f);
+            var result = new CanvasTextLayoutWrapper(tl, tf, style, allText);
             try
             {
                 var helperArgs = interProgram.OfType<IMappingHelperArg>().ToList();
@@ -53,12 +53,14 @@ namespace Ipatov.MarkupRender.Direct2D
             }
         }
 
-        private sealed class CanvasTextLayoutWrapper : IRenderDisposableWrapper<CanvasTextLayout>
+        private sealed class CanvasTextLayoutWrapper : IRenderTextLayoutResult
         {
-            public CanvasTextLayoutWrapper(CanvasTextLayout value, CanvasTextFormat textFormat)
+            public CanvasTextLayoutWrapper(CanvasTextLayout value, CanvasTextFormat textFormat, ITextRenderStyle style, string plainText)
             {
                 Value = value;
                 TextFormat = textFormat;
+                Style = style;
+                PlainText = plainText;
             }
 
             public void Dispose()
@@ -70,6 +72,9 @@ namespace Ipatov.MarkupRender.Direct2D
             public CanvasTextLayout Value { get; }
 
             public CanvasTextFormat TextFormat { get; }
+
+            public ITextRenderStyle Style { get; }
+            public string PlainText { get; }
         }
 
         private IEnumerable<IntermediateElement> CreateIntermediateProgram(IRenderCommandsSource program, ITextRenderStyle style)

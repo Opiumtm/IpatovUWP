@@ -134,9 +134,15 @@
     <Compile Include="Program\RenderProgramCommandsFormer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Render\Direct2D\IMappingHelperArg.cs" />
+    <Compile Include="Render\Direct2D\IRenderMeasureMap.cs" />
+    <Compile Include="Render\Direct2D\IRenderMeasureMapLine.cs" />
+    <Compile Include="Render\Direct2D\IRenderMeasureMapper.cs" />
+    <Compile Include="Render\Direct2D\IRenderTextLayoutResult.cs" />
     <Compile Include="Render\Direct2D\IRenderTextLayoutSource.cs" />
     <Compile Include="Render\Direct2D\MappingHelper.cs" />
     <Compile Include="Render\Direct2D\Range.cs" />
+    <Compile Include="Render\Direct2D\RenderMeasureMapElement.cs" />
+    <Compile Include="Render\Direct2D\RenderMeasureMapper.cs" />
     <Compile Include="Render\Direct2D\RenderTextLayoutSource.cs" />
     <Compile Include="Render\Direct2D\TextAttributeFlags.cs" />
     <Compile Include="Render\IRenderAttributesSnapshot.cs" />
