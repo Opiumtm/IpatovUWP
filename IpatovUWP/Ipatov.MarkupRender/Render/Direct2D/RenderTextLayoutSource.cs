@@ -20,8 +20,6 @@ namespace Ipatov.MarkupRender.Direct2D
         /// <param name="commandsSource">Text rendering commands source.</param>
         /// <param name="resourceCreator">Canvas resource creator.</param>
         /// <param name="style">Render style.</param>
-        /// <param name="width">Requested width</param>
-        /// <param name="height">Requested height</param>
         /// <returns>Cavvas text layout.</returns>
         public IRenderTextLayoutResult CreateLayout(IRenderCommandsSource commandsSource, ICanvasResourceCreator resourceCreator, ITextRenderStyle style)
         {

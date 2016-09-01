@@ -133,6 +133,8 @@
     <Compile Include="Program\RemoveAttributeRenderProgramElement.cs" />
     <Compile Include="Program\RenderProgramCommandsFormer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Render\Direct2D\Direct2DMapRenderer.cs" />
+    <Compile Include="Render\Direct2D\Direct2DRendererBase.cs" />
     <Compile Include="Render\Direct2D\IMappingHelperArg.cs" />
     <Compile Include="Render\Direct2D\IRenderMeasureMap.cs" />
     <Compile Include="Render\Direct2D\IRenderMeasureMapLine.cs" />
@@ -147,6 +149,8 @@
     <Compile Include="Render\Direct2D\TextAttributeFlags.cs" />
     <Compile Include="Render\IRenderAttributesSnapshot.cs" />
     <Compile Include="Render\IRenderDisposableWrapper.cs" />
+    <Compile Include="Render\IMeasureMapRenderer.cs" />
+    <Compile Include="Render\ITextRenderer.cs" />
     <Compile Include="Render\ITextRenderStyle.cs" />
     <Compile Include="Render\RenderAttributeSnapshot.cs" />
     <EmbeddedResource Include="Properties\Ipatov.MarkupRender.rd.xml" />
