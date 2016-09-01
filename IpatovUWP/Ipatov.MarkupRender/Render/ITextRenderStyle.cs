@@ -1,4 +1,6 @@
-﻿namespace Ipatov.MarkupRender
+﻿using Windows.UI;
+
+namespace Ipatov.MarkupRender
 {
     /// <summary>
     /// Text render style.
@@ -29,5 +31,30 @@
         /// Requested width.
         /// </summary>
         float Width { get; }
+
+        /// <summary>
+        /// Normal color.
+        /// </summary>
+        Color NormalColor { get; }
+
+        /// <summary>
+        /// Quote color.
+        /// </summary>
+        Color QuoteColor { get; }
+
+        /// <summary>
+        /// Spoiler background color.
+        /// </summary>
+        Color SpoilerBackground { get; }
+
+        /// <summary>
+        /// Spoiler foreground color.
+        /// </summary>
+        Color SpoilerColor { get; }
+
+        /// <summary>
+        /// Link color.
+        /// </summary>
+        Color LinkColor { get; }
     }
 }
