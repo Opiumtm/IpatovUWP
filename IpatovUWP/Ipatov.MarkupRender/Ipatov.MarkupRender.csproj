@@ -107,6 +107,12 @@
     <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Attributes\CommonTextAttributes.cs" />
+    <Compile Include="Attributes\ITextAttribute.cs" />
+    <Compile Include="Attributes\ITextAttributeData`1.cs" />
+    <Compile Include="Attributes\ITextAttributeState.cs" />
+    <Compile Include="Attributes\TextAttribute.cs" />
+    <Compile Include="Attributes\TextAttributeState.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Properties\Ipatov.MarkupRender.rd.xml" />
   </ItemGroup>
