@@ -41,6 +41,14 @@ namespace Ipatov.MarkupRender.Direct2D
             _style = style;
         }
 
+        /// <summary>
+        /// Measure map refreshed.
+        /// </summary>
+        /// <param name="map">Measure map.</param>
+        protected virtual void OnMapRefreshed(IRenderMeasureMap map)
+        {
+        }
+
         private bool EnsureMap()
         {
             if (_measureMap != null)
@@ -53,11 +61,18 @@ namespace Ipatov.MarkupRender.Direct2D
             }
             var layoutSource = new RenderTextLayoutSource();
             var mapper = new RenderMeasureMapper();
-            using (var session = CreateSession())
+            var session = CreateSession();
+            if (session == null)
+            {
+                return false;
+            }
+            using (session)
             {
                 using (var layout = layoutSource.CreateLayout(_commandsSource, session, _style))
                 {
                     _measureMap = mapper.MapLayout(layout);
+                    OnMapRefreshed(_measureMap);
+                    ExceedsLinesChanged?.Invoke(this, EventArgs.Empty);
                     return true;
                 }
             }
@@ -81,10 +96,16 @@ namespace Ipatov.MarkupRender.Direct2D
         /// </summary>
         public void Render()
         {
-            EnsureMap();
-            using (var mapRenderer = new Direct2DMapRenderer(CreateSession()))
+            if (EnsureMap())
             {
-                mapRenderer.Render(_measureMap);
+                var session = CreateSession();
+                if (session != null)
+                {
+                    using (var mapRenderer = new Direct2DMapRenderer(session))
+                    {
+                        mapRenderer.Render(_measureMap);
+                    }
+                }
             }
         }
 
@@ -95,8 +116,7 @@ namespace Ipatov.MarkupRender.Direct2D
         /// <returns>Render command at given coordinates or null if not found.</returns>
         public IRenderCommand TextAt(Point point)
         {
-            EnsureMap();
-            if (_measureMap == null)
+            if (!EnsureMap())
             {
                 return null;
             }
@@ -120,6 +140,16 @@ namespace Ipatov.MarkupRender.Direct2D
             }
             return null;
         }
+
+        /// <summary>
+        /// Exceeds max lines.
+        /// </summary>
+        public bool ExceedsLines => _measureMap?.ExceedLines ?? false;
+
+        /// <summary>
+        /// Exceeds max lines value changed.
+        /// </summary>
+        public event EventHandler ExceedsLinesChanged;
 
         /// <summary>
         /// Create drawing session.

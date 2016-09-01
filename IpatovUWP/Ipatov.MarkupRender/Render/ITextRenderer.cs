@@ -33,5 +33,15 @@ namespace Ipatov.MarkupRender
         /// <param name="point">Point.</param>
         /// <returns>Render command at given coordinates or null if not found.</returns>
         IRenderCommand TextAt(Point point);
+
+        /// <summary>
+        /// Exceeds max lines.
+        /// </summary>
+        bool ExceedsLines { get; }
+
+        /// <summary>
+        /// Exceeds max lines value changed.
+        /// </summary>
+        event EventHandler ExceedsLinesChanged;
     }
 }
