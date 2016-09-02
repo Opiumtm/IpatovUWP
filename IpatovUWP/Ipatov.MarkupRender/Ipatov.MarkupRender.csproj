@@ -145,18 +145,29 @@
     <Compile Include="Render\Direct2D\IRenderTextLayoutResult.cs" />
     <Compile Include="Render\Direct2D\IRenderTextLayoutSource.cs" />
     <Compile Include="Render\Direct2D\MappingHelper.cs" />
+    <Compile Include="Render\Direct2D\MeasureMapHelpers.cs" />
     <Compile Include="Render\Direct2D\Range.cs" />
     <Compile Include="Render\Direct2D\RenderMeasureMapElement.cs" />
     <Compile Include="Render\Direct2D\RenderMeasureMapper.cs" />
     <Compile Include="Render\Direct2D\RenderTextLayoutSource.cs" />
     <Compile Include="Render\Direct2D\TextAttributeFlags.cs" />
+    <Compile Include="Render\IMarkupRenderData.cs" />
     <Compile Include="Render\IRenderAttributesSnapshot.cs" />
     <Compile Include="Render\IRenderDisposableWrapper.cs" />
     <Compile Include="Render\IMeasureMapRenderer.cs" />
     <Compile Include="Render\ITextRenderer.cs" />
     <Compile Include="Render\ITextRenderStyle.cs" />
+    <Compile Include="Render\MarkupRenderControl.xaml.cs">
+      <DependentUpon>MarkupRenderControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Render\RenderAttributeSnapshot.cs" />
     <EmbeddedResource Include="Properties\Ipatov.MarkupRender.rd.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="Render\MarkupRenderControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>

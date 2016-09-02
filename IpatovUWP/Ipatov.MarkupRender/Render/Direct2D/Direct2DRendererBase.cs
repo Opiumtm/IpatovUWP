@@ -120,25 +120,7 @@ namespace Ipatov.MarkupRender.Direct2D
             {
                 return null;
             }
-            foreach (var line in _measureMap.GetMeasureMapLines())
-            {
-                if (_measureMap.MaxLines.HasValue)
-                {
-                    if (line.LineNumber >= _measureMap.MaxLines.Value)
-                    {
-                        break;
-                    }
-                }
-                foreach (var element in line.GetMeasureMap())
-                {
-                    var r = new Rect(element.Placement, element.Size);
-                    if (r.Contains(point))
-                    {
-                        return element.Command;
-                    }
-                }
-            }
-            return null;
+            return _measureMap.TextAt(point);
         }
 
         /// <summary>
