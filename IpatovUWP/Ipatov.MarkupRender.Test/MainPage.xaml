@@ -12,7 +12,7 @@
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <Border Background="White">
             <ScrollViewer HorizontalScrollMode="Disabled" HorizontalScrollBarVisibility="Disabled">
-                <markupRender:MarkupRenderControl x:Name="MarkupRenderer" HorizontalAlignment="Stretch" VerticalAlignment="Top" />
+                <markupRender:MarkupRenderControl x:Name="MarkupRenderer" HorizontalAlignment="Stretch" VerticalAlignment="Top" TextTapped="MarkupRenderer_OnTextTapped" />
             </ScrollViewer>
         </Border>
     </Grid>

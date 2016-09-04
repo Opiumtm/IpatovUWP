@@ -10,6 +10,7 @@ using Windows.Foundation.Collections;
 using Windows.Graphics.Display;
 using Windows.UI;
 using Windows.UI.Core;
+using Windows.UI.Input;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -100,6 +101,10 @@ namespace Ipatov.MarkupRender
                     });
                     await RenderMap();
                 }
+                DispatchAction(() =>
+                {
+                    ExceedsLines = map?.ExceedLines ?? false;
+                });
             }
             catch
             {
@@ -244,6 +249,26 @@ namespace Ipatov.MarkupRender
             (d as MarkupRenderControl)?.RenderDataChanged(e.NewValue as IMarkupRenderData);
         }
 
+        /// <summary>
+        /// Exceeds maximum lines.
+        /// </summary>
+        public static readonly DependencyProperty ExceedsLinesProperty = DependencyProperty.Register(
+            "ExceedsLines", typeof (bool), typeof (MarkupRenderControl), new PropertyMetadata(default(bool), ExceedsLinesPropertyChangedCallback));
+
+        /// <summary>
+        /// Exceeds maximum lines.
+        /// </summary>
+        public bool ExceedsLines
+        {
+            get { return (bool) GetValue(ExceedsLinesProperty); }
+            set { SetValue(ExceedsLinesProperty, value); }
+        }
+
+        private static void ExceedsLinesPropertyChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            (d as MarkupRenderControl)?.ExceedsLinesChanged?.Invoke(d, EventArgs.Empty);
+        }
+
         private void MarkupRenderControl_OnUnloaded(object sender, RoutedEventArgs e)
         {
             if (_diHandle != null)
@@ -289,5 +314,38 @@ namespace Ipatov.MarkupRender
                 }
             });
         }
+
+        private void ImageHost_OnTapped(object sender, TappedRoutedEventArgs e)
+        {
+            if (_measureMap != null)
+            {
+                var pos = e.GetPosition(ImageHost);
+                var command = _measureMap.TextAt(pos);
+                if (command != null)
+                {
+                    TextTapped?.Invoke(this, command);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Find text at given position.
+        /// </summary>
+        /// <param name="pos">Position relative to control.</param>
+        /// <returns>Found text.</returns>
+        public IRenderCommand TextAt(Point pos)
+        {
+            return _measureMap?.TextAt(pos);
+        }
+
+        /// <summary>
+        /// Text area tapped.
+        /// </summary>
+        public event EventHandler<IRenderCommand> TextTapped;
+
+        /// <summary>
+        /// ExceedsLines property changed.
+        /// </summary>
+        public event EventHandler ExceedsLinesChanged;
     }
 }

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.System;
 using Windows.UI;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -97,5 +98,17 @@ namespace Ipatov.MarkupRender.Test
         public Color SpoilerColor => Colors.Black;
 
         public Color LinkColor => Colors.Blue;
+
+        private async void MarkupRenderer_OnTextTapped(object sender, IRenderCommand e)
+        {
+            if (e.Attributes.ContainsKey(CommonTextAttributes.Link))
+            {
+                var l = e.Attributes[CommonTextAttributes.Link] as ITextAttributeData<Uri>;
+                if (l?.Value != null)
+                {
+                    await Launcher.LaunchUriAsync(l.Value);
+                }
+            }
+        }
     }
 }
