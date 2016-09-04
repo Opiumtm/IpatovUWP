@@ -13,16 +13,21 @@ namespace Ipatov.MarkupRender
 
         private readonly List<IRenderCommand> _result = new List<IRenderCommand>();
 
+        private readonly object Lock = new object();
+
         /// <summary>
         /// Push program element.
         /// </summary>
         /// <param name="element">Element.</param>
         public void Push(IRenderProgramElement element)
         {
-            if (!_internalFormer.AddElement(element))
+            lock (Lock)
             {
-                Flush();
-                _internalFormer.AddElement(element);
+                if (!_internalFormer.AddElement(element))
+                {
+                    Flush();
+                    _internalFormer.AddElement(element);
+                }
             }
         }
 
@@ -31,8 +36,11 @@ namespace Ipatov.MarkupRender
         /// </summary>
         public void Clear()
         {
-            _internalFormer.Clear();
-            _result.Clear();
+            lock (Lock)
+            {
+                _internalFormer.Clear();
+                _result.Clear();
+            }
         }
 
         /// <summary>
@@ -40,12 +48,15 @@ namespace Ipatov.MarkupRender
         /// </summary>
         public void Flush()
         {
-            var command = _internalFormer.GetCommand();
-            if (command != null)
+            lock (Lock)
             {
-                _result.Add(command);
+                var command = _internalFormer.GetCommand();
+                if (command != null)
+                {
+                    _result.Add(command);
+                }
+                _internalFormer.Flush();
             }
-            _internalFormer.Flush();
         }
 
         /// <summary>
@@ -54,7 +65,10 @@ namespace Ipatov.MarkupRender
         /// <returns>Render commands.</returns>
         public IReadOnlyList<IRenderCommand> GetCommands()
         {
-            return _result.ToArray();
+            lock (Lock)
+            {
+                return _result.ToArray();
+            }
         }
 
         private sealed class CommandFormerInternal

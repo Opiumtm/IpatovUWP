@@ -160,6 +160,7 @@
     <Compile Include="Render\MarkupRenderControl.xaml.cs">
       <DependentUpon>MarkupRenderControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Render\MarkupRenderData.cs" />
     <Compile Include="Render\RenderAttributeSnapshot.cs" />
     <EmbeddedResource Include="Properties\Ipatov.MarkupRender.rd.xml" />
   </ItemGroup>

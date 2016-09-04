@@ -8,12 +8,10 @@
     xmlns:d2d="using:Microsoft.Graphics.Canvas.UI.Xaml"
     mc:Ignorable="d"
     d:DesignHeight="300"
-    d:DesignWidth="400" 
-    Unloaded="MarkupRenderControl_OnUnloaded"
-    Loaded="MarkupRenderControl_OnLoaded"
-    SizeChanged="MarkupRenderControl_OnSizeChanged">
+    d:DesignWidth="400"         
+    >
 
     <Grid>
-        <d2d:CanvasSwapChainPanel x:Name="SwapChainPanel" />
+        <Image x:Name="ImageHost" Margin="0" HorizontalAlignment="Left" VerticalAlignment="Top" Stretch="None" />
     </Grid>
 </UserControl>

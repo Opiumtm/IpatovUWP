@@ -27,18 +27,22 @@ namespace Ipatov.MarkupRender.Direct2D
 
         private ITextRenderStyle _style;
 
+        private float _width = 100f;
+
         /// <summary>
         /// Set render data.
         /// </summary>
         /// <param name="commandsSource">Command source.</param>
         /// <param name="style">Style.</param>
-        public void SetRenderData(IRenderCommandsSource commandsSource, ITextRenderStyle style)
+        /// <param name="width">Width.</param>
+        public void SetRenderData(IRenderCommandsSource commandsSource, ITextRenderStyle style, float width)
         {
             if (commandsSource == null) throw new ArgumentNullException(nameof(commandsSource));
             if (style == null) throw new ArgumentNullException(nameof(style));
             _measureMap = null;
             _commandsSource = commandsSource;
             _style = style;
+            _width = width;
         }
 
         /// <summary>
@@ -68,7 +72,7 @@ namespace Ipatov.MarkupRender.Direct2D
             }
             using (session)
             {
-                using (var layout = layoutSource.CreateLayout(_commandsSource, session, _style))
+                using (var layout = layoutSource.CreateLayout(_commandsSource, session, _style, _width))
                 {
                     _measureMap = mapper.MapLayout(layout);
                     OnMapRefreshed(_measureMap);

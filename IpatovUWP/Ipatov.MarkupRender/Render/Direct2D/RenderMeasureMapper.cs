@@ -21,7 +21,7 @@ namespace Ipatov.MarkupRender.Direct2D
         {
             if (layout == null) throw new ArgumentNullException(nameof(layout));
             var map = AnalyzeMap(layout.Value, layout.PlainText).ToArray();
-            var result = new MeasureMap(map, layout.Style.Width, layout.Style.MaxLines, layout.Style);
+            var result = new MeasureMap(map, layout.Width, layout.Style.MaxLines, layout.Style);
             return result;
         }
 

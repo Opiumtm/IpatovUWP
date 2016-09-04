@@ -28,11 +28,6 @@ namespace Ipatov.MarkupRender
         int? MaxLines { get; }
 
         /// <summary>
-        /// Requested width.
-        /// </summary>
-        float Width { get; }
-
-        /// <summary>
         /// Normal color.
         /// </summary>
         Color NormalColor { get; }

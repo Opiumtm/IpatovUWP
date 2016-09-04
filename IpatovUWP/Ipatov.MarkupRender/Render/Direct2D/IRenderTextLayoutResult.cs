@@ -16,5 +16,10 @@ namespace Ipatov.MarkupRender.Direct2D
         /// Plain text.
         /// </summary>
         string PlainText { get; }
+
+        /// <summary>
+        /// Render width.
+        /// </summary>
+        float Width { get; }
     }
 }

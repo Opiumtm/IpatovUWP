@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.Graphics.Display;
@@ -17,6 +19,7 @@ using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 using Ipatov.MarkupRender.Direct2D;
 using Microsoft.Graphics.Canvas;
+using Microsoft.Graphics.Canvas.UI.Xaml;
 
 // The User Control item template is documented at http://go.microsoft.com/fwlink/?LinkId=234236
 
@@ -29,17 +32,22 @@ namespace Ipatov.MarkupRender
     {
         private readonly IRenderMeasureMapper _mapper = new RenderMeasureMapper();
 
+        private readonly IRenderTextLayoutSource _layoutSource = new RenderTextLayoutSource();
+
         private DisplayInformation _diHandle;
 
         private float _dpi = 96f;
 
         private IRenderMeasureMap _measureMap;
 
-        private CanvasSwapChain _swapChain;
+        private CanvasImageSource _imageSource;
 
         public MarkupRenderControl()
         {
             this.InitializeComponent();
+            Loaded += MarkupRenderControl_OnLoaded;
+            Unloaded += MarkupRenderControl_OnUnloaded;
+            SizeChanged += MarkupRenderControl_OnSizeChanged;
         }
 
         private void DispatchAction(Action a)
@@ -56,44 +64,164 @@ namespace Ipatov.MarkupRender
             });
         }
 
-        private void InvalidateData(IMarkupRenderData renderData)
+        private async Task<Tuple<IRenderMeasureMap, CanvasImageSource>> GetMapAndSwapChain()
         {
+            if (Dispatcher.HasThreadAccess)
+            {
+                return new Tuple<IRenderMeasureMap, CanvasImageSource>(_measureMap, _imageSource);
+            }
+            else
+            {
+                Tuple<IRenderMeasureMap, CanvasImageSource> result = null;
+                await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+                {
+                    result = new Tuple<IRenderMeasureMap, CanvasImageSource>(_measureMap, _imageSource);
+                });
+                return result;
+            }
         }
 
-        private void RenderMap()
+        private async Task SetMap(IRenderMeasureMap map)
         {
-            if (_measureMap != null && _swapChain != null)
+            try
             {
-                using (var session = _swapChain.CreateDrawingSession(Colors.Transparent))
+                if (Dispatcher.HasThreadAccess)
                 {
-                    
+                    _measureMap = map;
+                    InvalidateImageSource(map?.Bounds ?? new Size(0,0));
+                    await RenderMap();
+                }
+                else
+                {
+                    await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+                    {
+                        _measureMap = map;
+                        InvalidateImageSource(map?.Bounds ?? new Size(0, 0));
+                    });
+                    await RenderMap();
+                }
+            }
+            catch
+            {
+                // ignore
+            }
+        }
+
+        private float GetActualWidth()
+        {
+            if (double.IsInfinity(ActualWidth))
+            {
+                return 0;
+            }
+            return (float)ActualWidth;
+        }
+
+        private async void InvalidateData(IMarkupRenderData renderData, float width, float dpi)
+        {
+            try
+            {
+                if (renderData?.Commands != null && renderData?.Style != null)
+                {
+                    if (width < 1f)
+                    {
+                        await SetMap(null);
+                    }
+                    else
+                    {
+                        IRenderMeasureMap map = null;
+                        await Task.Factory.StartNew(() =>
+                        {
+                            var device = CanvasDevice.GetSharedDevice();
+                            using (var t = new CanvasRenderTarget(device, (float)width, 10f, dpi))
+                            {
+                                using (var layout = _layoutSource.CreateLayout(renderData.Commands, t, renderData.Style, width))
+                                {
+                                    map = _mapper.MapLayout(layout);
+                                }
+                            }
+                        });
+                        await SetMap(map);
+                    }
+                }
+                else
+                {
+                    await SetMap(null);
+                }
+            }
+            catch
+            {
+                // ignore
+            }
+        }
+
+        private readonly object _renderLock = new object();
+
+        private async Task RenderMap()
+        {
+            try
+            {
+                var par = await GetMapAndSwapChain();
+                await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+                {
+                    if (par?.Item1 != null && par?.Item2 != null && par.Item2.Size.Width > 15)
+                    {
+                        var swapChain = par.Item2;
+                        var map = par.Item1;
+                        lock (_renderLock)
+                        {
+                            using (var session = swapChain.CreateDrawingSession(Colors.Transparent))
+                            {
+                                using (var renderer = new Direct2DMapRenderer(session))
+                                {
+                                    session.Clear(Colors.Transparent);
+                                    renderer.Render(map);
+                                }
+                            }
+                        }
+                    } else if (par?.Item2 != null)
+                    {
+                        var swapChain = par.Item2;
+                        lock (_renderLock)
+                        {
+                            using (var session = swapChain.CreateDrawingSession(Colors.Transparent))
+                            {
+                                session.Clear(Colors.Transparent);
+                            }
+                        }
+                    }
+                });
+            }
+            catch
+            {
+                // ignore
+            }
+        }
+
+        private Size? _mapSize;
+
+        private void InvalidateImageSource(Size mapSize)
+        {
+            if (_mapSize != mapSize)
+            {
+                _mapSize = mapSize;
+                if (mapSize.Height < 1 || mapSize.Width < 1)
+                {
+                    _imageSource = null;
+                    ImageHost.Source = null;
+                }
+                else
+                {
+                    _imageSource = new CanvasImageSource(CanvasDevice.GetSharedDevice(), (float)mapSize.Width, (float)mapSize.Height, _dpi);
+                    ImageHost.Source = _imageSource;
+                    ImageHost.Width = mapSize.Width;
+                    ImageHost.Height = mapSize.Height;
                 }
             }
         }
 
-        private void InvalidateSwapChain()
-        {
-            if (_swapChain != null)
-            {
-                _swapChain.Dispose();
-                _swapChain = null;
-            }
-            _swapChain = new CanvasSwapChain(CanvasDevice.GetSharedDevice(), (float)ActualWidth, (float)ActualHeight, _dpi);
-            SwapChainPanel.SwapChain = _swapChain;
-        }
-
         private void RenderDataChanged(IMarkupRenderData renderData)
         {
-            DispatchAction(() => InvalidateData(renderData));
-        }
-
-        protected override Size MeasureOverride(Size availableSize)
-        {
-            if (_measureMap == null)
-            {
-                return new Size(10, 10);
-            }
-            return _measureMap.Bounds;
+            DispatchAction(() => InvalidateData(renderData, GetActualWidth(), _dpi));
         }
 
         /// <summary>
@@ -118,18 +246,13 @@ namespace Ipatov.MarkupRender
 
         private void MarkupRenderControl_OnUnloaded(object sender, RoutedEventArgs e)
         {
-            SwapChainPanel.RemoveFromVisualTree();
-            SwapChainPanel = null;
             if (_diHandle != null)
             {
                 _diHandle.DpiChanged -= OnDpiChanged;
                 _diHandle = null;
             }
-            if (_swapChain != null)
-            {
-                _swapChain.Dispose();
-                _swapChain = null;
-            }
+            ImageHost.Source = null;
+            _imageSource = null;
         }
 
         private void MarkupRenderControl_OnLoaded(object sender, RoutedEventArgs e)
@@ -140,7 +263,7 @@ namespace Ipatov.MarkupRender
             {
                 _diHandle.DpiChanged += OnDpiChanged;
             }
-            InvalidateSwapChain();
+            InvalidateData(RenderData, GetActualWidth(), _dpi);
         }
 
         private void OnDpiChanged(DisplayInformation sender, object args)
@@ -148,13 +271,23 @@ namespace Ipatov.MarkupRender
             DispatchAction(() =>
             {
                 _dpi = _diHandle?.LogicalDpi ?? 96f;
-                InvalidateSwapChain();
+                InvalidateData(RenderData, GetActualWidth(), _dpi);
             });
         }
 
+        private float? _width;
+
         private void MarkupRenderControl_OnSizeChanged(object sender, SizeChangedEventArgs e)
         {
-            InvalidateSwapChain();
+            DispatchAction(() =>
+            {
+                var w = GetActualWidth();
+                if (w != _width)
+                {
+                    _width = w;
+                    InvalidateData(RenderData, w, _dpi);
+                }
+            });
         }
     }
 }

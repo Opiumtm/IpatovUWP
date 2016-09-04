@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ipatov.ServiceLocator", "Ip
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ipatov.MarkupRender", "Ipatov.MarkupRender\Ipatov.MarkupRender.csproj", "{9CFE9A8D-B88C-4EE0-820D-C8EF020D11D2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ipatov.MarkupRender.Test", "Ipatov.MarkupRender.Test\Ipatov.MarkupRender.Test.csproj", "{FF0CEC3B-3CD4-44E9-ACE3-5C5A8C274DE2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -69,6 +71,26 @@ Global
 		{9CFE9A8D-B88C-4EE0-820D-C8EF020D11D2}.Release|x64.Build.0 = Release|x64
 		{9CFE9A8D-B88C-4EE0-820D-C8EF020D11D2}.Release|x86.ActiveCfg = Release|x86
 		{9CFE9A8D-B88C-4EE0-820D-C8EF020D11D2}.Release|x86.Build.0 = Release|x86
+		{FF0CEC3B-3CD4-44E9-ACE3-5C5A8C274DE2}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{FF0CEC3B-3CD4-44E9-ACE3-5C5A8C274DE2}.Debug|ARM.ActiveCfg = Debug|ARM
+		{FF0CEC3B-3CD4-44E9-ACE3-5C5A8C274DE2}.Debug|ARM.Build.0 = Debug|ARM
+		{FF0CEC3B-3CD4-44E9-ACE3-5C5A8C274DE2}.Debug|ARM.Deploy.0 = Debug|ARM
+		{FF0CEC3B-3CD4-44E9-ACE3-5C5A8C274DE2}.Debug|x64.ActiveCfg = Debug|x64
+		{FF0CEC3B-3CD4-44E9-ACE3-5C5A8C274DE2}.Debug|x64.Build.0 = Debug|x64
+		{FF0CEC3B-3CD4-44E9-ACE3-5C5A8C274DE2}.Debug|x64.Deploy.0 = Debug|x64
+		{FF0CEC3B-3CD4-44E9-ACE3-5C5A8C274DE2}.Debug|x86.ActiveCfg = Debug|x86
+		{FF0CEC3B-3CD4-44E9-ACE3-5C5A8C274DE2}.Debug|x86.Build.0 = Debug|x86
+		{FF0CEC3B-3CD4-44E9-ACE3-5C5A8C274DE2}.Debug|x86.Deploy.0 = Debug|x86
+		{FF0CEC3B-3CD4-44E9-ACE3-5C5A8C274DE2}.Release|Any CPU.ActiveCfg = Release|x86
+		{FF0CEC3B-3CD4-44E9-ACE3-5C5A8C274DE2}.Release|ARM.ActiveCfg = Release|ARM
+		{FF0CEC3B-3CD4-44E9-ACE3-5C5A8C274DE2}.Release|ARM.Build.0 = Release|ARM
+		{FF0CEC3B-3CD4-44E9-ACE3-5C5A8C274DE2}.Release|ARM.Deploy.0 = Release|ARM
+		{FF0CEC3B-3CD4-44E9-ACE3-5C5A8C274DE2}.Release|x64.ActiveCfg = Release|x64
+		{FF0CEC3B-3CD4-44E9-ACE3-5C5A8C274DE2}.Release|x64.Build.0 = Release|x64
+		{FF0CEC3B-3CD4-44E9-ACE3-5C5A8C274DE2}.Release|x64.Deploy.0 = Release|x64
+		{FF0CEC3B-3CD4-44E9-ACE3-5C5A8C274DE2}.Release|x86.ActiveCfg = Release|x86
+		{FF0CEC3B-3CD4-44E9-ACE3-5C5A8C274DE2}.Release|x86.Build.0 = Release|x86
+		{FF0CEC3B-3CD4-44E9-ACE3-5C5A8C274DE2}.Release|x86.Deploy.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

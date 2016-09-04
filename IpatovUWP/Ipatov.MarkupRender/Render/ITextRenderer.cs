@@ -14,7 +14,8 @@ namespace Ipatov.MarkupRender
         /// </summary>
         /// <param name="commandsSource">Command source.</param>
         /// <param name="style">Style.</param>
-        void SetRenderData(IRenderCommandsSource commandsSource, ITextRenderStyle style);
+        /// <param name="width">Width.</param>
+        void SetRenderData(IRenderCommandsSource commandsSource, ITextRenderStyle style, float width);
 
         /// <summary>
         /// Get text bounds.

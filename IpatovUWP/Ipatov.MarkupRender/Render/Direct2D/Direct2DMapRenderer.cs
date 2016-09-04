@@ -72,6 +72,7 @@ namespace Ipatov.MarkupRender.Direct2D
                 Rect textRect = new Rect(element.Placement, element.Size);
                 if (flags.HasFlag(TextAttributeFlags.Superscript) || flags.HasFlag(TextAttributeFlags.Subscript))
                 {
+                    textRect.Height = textRect.Height*2.0/3.0;
                     if (flags.HasFlag(TextAttributeFlags.Superscript) && flags.HasFlag(TextAttributeFlags.Subscript))
                     {
                         var d = (lineHeight - textRect.Height)/2;
@@ -197,7 +198,7 @@ namespace Ipatov.MarkupRender.Direct2D
                 {
                     tf.FontStyle = FontStyle.Italic;
                 }
-                if (flags.HasFlag(TextAttributeFlags.Superscript) || flags.HasFlag(TextAttributeFlags.Superscript))
+                if (flags.HasFlag(TextAttributeFlags.Superscript) || flags.HasFlag(TextAttributeFlags.Subscript))
                 {
                     tf.FontSize = tf.FontSize*2.0f/3.0f;
                 }
