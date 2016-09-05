@@ -12,6 +12,6 @@
     >
 
     <Grid>
-        <Image x:Name="ImageHost" Margin="0" HorizontalAlignment="Left" VerticalAlignment="Top" Stretch="None" Tapped="ImageHost_OnTapped" Holding="ImageHost_OnHolding" RightTapped="ImageHost_OnRightTapped" PointerPressed="ImageHost_OnPointerPressed" />
+        <Image x:Name="ImageHost" Margin="0" HorizontalAlignment="Left" VerticalAlignment="Top" Stretch="None" Tapped="ImageHost_OnTapped" />
     </Grid>
 </UserControl>

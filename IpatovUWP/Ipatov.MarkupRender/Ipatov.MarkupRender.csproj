@@ -162,6 +162,7 @@
     </Compile>
     <Compile Include="Render\MarkupRenderData.cs" />
     <Compile Include="Render\RenderAttributeSnapshot.cs" />
+    <Compile Include="Render\TextRenderStyle.cs" />
     <EmbeddedResource Include="Properties\Ipatov.MarkupRender.rd.xml" />
   </ItemGroup>
   <ItemGroup>

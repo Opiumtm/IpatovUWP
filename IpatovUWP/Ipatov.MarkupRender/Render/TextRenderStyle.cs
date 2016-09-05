@@ -6,56 +6,64 @@ namespace Ipatov.MarkupRender
     /// <summary>
     /// Text render style.
     /// </summary>
-    public interface ITextRenderStyle
+    public sealed class TextRenderStyle : ITextRenderStyle
     {
         /// <summary>
         /// Normal font face.
         /// </summary>
-        string FontFace { get; }         
+        public string FontFace { get; set; } = "Segoe UI";
 
         /// <summary>
         /// Monospace font face.
         /// </summary>
-        string FixedFontFace { get; }
+        public string FixedFontFace { get; set; } = "Courier New";
 
         /// <summary>
         /// Font size.
         /// </summary>
-        float FontSize { get; }
+        public float FontSize { get; set; } = 14;
 
         /// <summary>
         /// Maximum number of lines.
         /// </summary>
-        int? MaxLines { get; }
+        public int? MaxLines { get; } = null;
 
         /// <summary>
         /// Normal color.
         /// </summary>
-        Color NormalColor { get; }
+        public Color NormalColor { get; set; } = Colors.Black;
 
         /// <summary>
         /// Quote color.
         /// </summary>
-        Color QuoteColor { get; }
+        public Color QuoteColor { get; set; } = Colors.Green;
 
         /// <summary>
         /// Spoiler background color.
         /// </summary>
-        Color SpoilerBackground { get; }
+        public Color SpoilerBackground { get; set; } = Colors.Gray;
 
         /// <summary>
         /// Spoiler foreground color.
         /// </summary>
-        Color SpoilerColor { get; }
+        public Color SpoilerColor { get; set; } = Colors.Black;
 
         /// <summary>
         /// Link color.
         /// </summary>
-        Color LinkColor { get; }
+        public Color LinkColor { get; set; } = Colors.Blue;
 
         /// <summary>
         /// Style changed.
         /// </summary>
-        event EventHandler StyleChanged;
+        public event EventHandler StyleChanged;
+
+        /// <summary>
+        /// Trigger style changed.
+        /// </summary>
+        public void TriggerStyleChanged()
+        {
+            StyleChanged?.Invoke(this, EventArgs.Empty);
+        }
     }
 }

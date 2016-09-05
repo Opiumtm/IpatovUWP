@@ -224,9 +224,28 @@ namespace Ipatov.MarkupRender
             }
         }
 
-        private void RenderDataChanged(IMarkupRenderData renderData)
+        private void RenderDataChanged(IMarkupRenderData renderData, IMarkupRenderData oldData)
         {
-            DispatchAction(() => InvalidateData(renderData, GetActualWidth(), _dpi));
+            DispatchAction(() =>
+            {
+                if (oldData?.Style != null)
+                {
+                    oldData.Style.StyleChanged -= StyleOnStyleChanged;
+                }
+                if (renderData?.Style != null)
+                {
+                    renderData.Style.StyleChanged += StyleOnStyleChanged;
+                }
+                InvalidateData(renderData, GetActualWidth(), _dpi);
+            });
+        }
+
+        private void StyleOnStyleChanged(object sender, EventArgs eventArgs)
+        {
+            DispatchAction(() =>
+            {
+                InvalidateData(RenderData, GetActualWidth(), _dpi);
+            });
         }
 
         /// <summary>
@@ -246,7 +265,7 @@ namespace Ipatov.MarkupRender
 
         private static void RenderDataChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            (d as MarkupRenderControl)?.RenderDataChanged(e.NewValue as IMarkupRenderData);
+            (d as MarkupRenderControl)?.RenderDataChanged(e.NewValue as IMarkupRenderData, e.OldValue as IMarkupRenderData);
         }
 
         /// <summary>

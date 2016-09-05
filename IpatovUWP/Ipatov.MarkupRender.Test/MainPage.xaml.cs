@@ -99,6 +99,8 @@ namespace Ipatov.MarkupRender.Test
 
         public Color LinkColor => Colors.Blue;
 
+        public event EventHandler StyleChanged;
+
         private async void MarkupRenderer_OnTextTapped(object sender, IRenderCommand e)
         {
             if (e.Attributes.ContainsKey(CommonTextAttributes.Link))
