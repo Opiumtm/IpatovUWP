@@ -64,6 +64,7 @@ namespace Ipatov.MarkupRender
                     }
                     catch
                     {
+                        // ignore
                     }
                 });
 
@@ -79,7 +80,14 @@ namespace Ipatov.MarkupRender
                 RenderHost?.Invalidate();
                 var unwaitedTask = Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
                 {
-                    ExceedsLines = map?.ExceedLines ?? false;
+                    try
+                    {
+                        ExceedsLines = map?.ExceedLines ?? false;
+                    }
+                    catch
+                    {
+                        // ignore
+                    }
                 });
             }
             catch
@@ -90,7 +98,7 @@ namespace Ipatov.MarkupRender
 
         private float GetActualWidth()
         {
-            if (double.IsInfinity(ActualWidth))
+            if (double.IsInfinity(ActualWidth) || double.IsNaN(ActualWidth))
             {
                 return 0;
             }
