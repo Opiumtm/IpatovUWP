@@ -52,6 +52,13 @@ namespace Ipatov.MarkupRender
             Loaded += MarkupRenderControl_OnLoaded;
             Unloaded += MarkupRenderControl_OnUnloaded;
             SizeChanged += MarkupRenderControl_OnSizeChanged;
+            _diHandle = DisplayInformation.GetForCurrentView();
+            _dpi = _diHandle?.LogicalDpi ?? 96f;
+            if (_diHandle != null)
+            {
+                _diHandle.DpiChanged += OnDpiChanged;
+            }
+            EnsureDevice();
         }
 
         private void EnsureDevice()
@@ -336,13 +343,6 @@ namespace Ipatov.MarkupRender
 
         private void MarkupRenderControl_OnLoaded(object sender, RoutedEventArgs e)
         {
-            _diHandle = DisplayInformation.GetForCurrentView();
-            _dpi = _diHandle?.LogicalDpi ?? 96f;
-            if (_diHandle != null)
-            {
-                _diHandle.DpiChanged += OnDpiChanged;
-            }
-            EnsureDevice();
             InvalidateData(RenderData, GetActualWidth(), _dpi);
         }
 
