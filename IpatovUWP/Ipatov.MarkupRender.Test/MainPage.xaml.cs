@@ -49,7 +49,6 @@ namespace Ipatov.MarkupRender.Test
             p.Push(CommonProgramElements.RemoveAttributeElement(link));
             p.Push(CommonProgramElements.LinkeBreakElement);
             p.Push(CommonProgramElements.LinkeBreakElement);
-            p.Flush();
             p.Push(CommonProgramElements.AddAttributeElement(CommonTextAttributes.StrikethroughAttribute));
             p.Push(CommonProgramElements.PrintTextElement("Зачёркнутый текст"));
             p.Push(CommonProgramElements.RemoveAttributeElement(CommonTextAttributes.StrikethroughAttribute));
@@ -78,7 +77,13 @@ namespace Ipatov.MarkupRender.Test
             p.Push(CommonProgramElements.PrintTextElement("1"));
             p.Push(CommonProgramElements.RemoveAttributeElement(CommonTextAttributes.SubscriptAttribute));
             p.Push(CommonProgramElements.RemoveAttributeElement(CommonTextAttributes.StrikethroughAttribute));
-            MarkupRenderer.RenderData = new MarkupRenderData(p, this);
+            p.Push(CommonProgramElements.LinkeBreakElement);
+            p.Push(CommonProgramElements.LinkeBreakElement);
+            p.Push(CommonProgramElements.AddAttributeElement(CommonTextAttributes.FixedAttribute));
+            p.Push(CommonProgramElements.PrintTextElement(Ipsum));
+            p.Push(CommonProgramElements.RemoveAttributeElement(CommonTextAttributes.FixedAttribute));
+            p.Flush();
+            MarkupRenderer.RenderData = new MarkupRenderData { Commands = p, Style = this };
         }
 
         public string FontFace => "Segoe UI";

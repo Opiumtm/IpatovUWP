@@ -1,9 +1,11 @@
-﻿namespace Ipatov.MarkupRender
+﻿using System.ComponentModel;
+
+namespace Ipatov.MarkupRender
 {
     /// <summary>
     /// Markup render control data.
     /// </summary>
-    public interface IMarkupRenderData
+    public interface IMarkupRenderData : INotifyPropertyChanged
     {
         /// <summary>
         /// Render commands.

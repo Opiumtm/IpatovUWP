@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -159,8 +160,6 @@ namespace Ipatov.MarkupRender
             }
         }
 
-        private readonly object _renderLock = new object();
-
         private async Task RenderMap()
         {
             try
@@ -172,26 +171,20 @@ namespace Ipatov.MarkupRender
                     {
                         var swapChain = par.Item2;
                         var map = par.Item1;
-                        lock (_renderLock)
+                        using (var session = swapChain.CreateDrawingSession(Colors.Transparent))
                         {
-                            using (var session = swapChain.CreateDrawingSession(Colors.Transparent))
+                            using (var renderer = new Direct2DMapRenderer(session))
                             {
-                                using (var renderer = new Direct2DMapRenderer(session))
-                                {
-                                    session.Clear(Colors.Transparent);
-                                    renderer.Render(map);
-                                }
+                                session.Clear(Colors.Transparent);
+                                renderer.Render(map);
                             }
                         }
                     } else if (par?.Item2 != null)
                     {
                         var swapChain = par.Item2;
-                        lock (_renderLock)
+                        using (var session = swapChain.CreateDrawingSession(Colors.Transparent))
                         {
-                            using (var session = swapChain.CreateDrawingSession(Colors.Transparent))
-                            {
-                                session.Clear(Colors.Transparent);
-                            }
+                            session.Clear(Colors.Transparent);
                         }
                     }
                 });
@@ -224,19 +217,59 @@ namespace Ipatov.MarkupRender
             }
         }
 
+        private bool _isUnloaded;
+
         private void RenderDataChanged(IMarkupRenderData renderData, IMarkupRenderData oldData)
         {
             DispatchAction(() =>
             {
-                if (oldData?.Style != null)
+                if (oldData != null)
                 {
-                    oldData.Style.StyleChanged -= StyleOnStyleChanged;
+                    oldData.PropertyChanged -= RenderDataOnPropertyChanged;
                 }
-                if (renderData?.Style != null)
+                if (renderData != null)
                 {
-                    renderData.Style.StyleChanged += StyleOnStyleChanged;
+                    renderData.PropertyChanged += RenderDataOnPropertyChanged;
                 }
-                InvalidateData(renderData, GetActualWidth(), _dpi);
+                StyleObjectChanged(renderData?.Style);
+                if (!_isUnloaded)
+                {
+                    InvalidateData(renderData, GetActualWidth(), _dpi);
+                }
+            });
+        }
+
+        private ITextRenderStyle _currentStyle;
+
+        private void StyleObjectChanged(ITextRenderStyle style)
+        {
+            if (_currentStyle != null)
+            {
+                _currentStyle.StyleChanged -= StyleOnStyleChanged;
+            }
+            if (style != null)
+            {
+                style.StyleChanged += StyleOnStyleChanged;
+            }
+            _currentStyle = style;
+        }
+
+        private void RenderDataOnPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            DispatchAction(() =>
+            {
+                if (object.ReferenceEquals(sender, RenderData))
+                {
+                    if (e.PropertyName == nameof(IMarkupRenderData.Commands))
+                    {
+                        InvalidateData(RenderData, GetActualWidth(), _dpi);
+                    }
+                    if (e.PropertyName == nameof(IMarkupRenderData.Style))
+                    {
+                        StyleObjectChanged(RenderData?.Style);
+                        InvalidateData(RenderData, GetActualWidth(), _dpi);
+                    }
+                }
             });
         }
 
@@ -290,6 +323,7 @@ namespace Ipatov.MarkupRender
 
         private void MarkupRenderControl_OnUnloaded(object sender, RoutedEventArgs e)
         {
+            _isUnloaded = true;
             if (_diHandle != null)
             {
                 _diHandle.DpiChanged -= OnDpiChanged;
@@ -297,6 +331,7 @@ namespace Ipatov.MarkupRender
             }
             ImageHost.Source = null;
             _imageSource = null;
+            RenderData = null;
         }
 
         private void MarkupRenderControl_OnLoaded(object sender, RoutedEventArgs e)
