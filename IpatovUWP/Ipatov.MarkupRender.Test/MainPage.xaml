@@ -10,7 +10,7 @@
     Loaded="MainPage_OnLoaded">
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-        <Border Background="White">
+        <Border Background="White" RightTapped="UIElement_OnRightTapped">
             <ScrollViewer HorizontalScrollMode="Disabled" HorizontalScrollBarVisibility="Disabled">
                 <markupRender:MarkupRenderControl x:Name="MarkupRenderer" HorizontalAlignment="Stretch" VerticalAlignment="Top" TextTapped="MarkupRenderer_OnTextTapped" />
             </ScrollViewer>

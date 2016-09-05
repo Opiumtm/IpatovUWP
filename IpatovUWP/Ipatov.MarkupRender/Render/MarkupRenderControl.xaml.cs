@@ -76,7 +76,7 @@ namespace Ipatov.MarkupRender
             {
                 _measureMap = map;
                 InvalidateImageSource(map?.Bounds ?? new Size(0,0), false, false);
-                RenderHost.Invalidate();
+                RenderHost?.Invalidate();
                 var unwaitedTask = Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
                 {
                     ExceedsLines = map?.ExceedLines ?? false;
@@ -135,20 +135,9 @@ namespace Ipatov.MarkupRender
 
         private void RenderMap(CanvasDrawingSession session, Rect r)
         {
-            try
+            using (var renderer = new Direct2DMapRenderer(session, r) { DisposeSession = false, ClearOnRenderColor = Colors.Transparent })
             {
-                session.Clear(Colors.Transparent);
-                if (_measureMap != null)
-                {
-                    using (var renderer = new Direct2DMapRenderer(session, r) {DisposeSession = false})
-                    {
-                        renderer.Render(_measureMap);
-                    }
-                }
-            }
-            catch
-            {
-                // ignore
+                renderer.Render(_measureMap);
             }
         }
 
@@ -159,11 +148,14 @@ namespace Ipatov.MarkupRender
             if (_mapSize != mapSize || force)
             {
                 _mapSize = mapSize;
-                RenderHost.Width = Math.Max(10, mapSize.Width);
-                RenderHost.Height = Math.Max(10, mapSize.Height);
-                if (invalidate)
+                if (RenderHost != null)
                 {
-                    RenderHost.Invalidate();
+                    RenderHost.Width = Math.Max(10, mapSize.Width);
+                    RenderHost.Height = Math.Max(10, mapSize.Height);
+                    if (invalidate)
+                    {
+                        RenderHost.Invalidate();
+                    }
                 }
             }
         }
@@ -276,7 +268,7 @@ namespace Ipatov.MarkupRender
         {
             _isUnloaded = true;
             RenderData = null;
-            RenderHost.RemoveFromVisualTree();
+            RenderHost?.RemoveFromVisualTree();
             RenderHost = null;
         }
 

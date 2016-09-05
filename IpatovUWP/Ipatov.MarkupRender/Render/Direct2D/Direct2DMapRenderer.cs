@@ -21,7 +21,12 @@ namespace Ipatov.MarkupRender.Direct2D
         /// <summary>
         /// Dispose drawing session.
         /// </summary>
-        public bool DisposeSession { get; set; } = true;
+        public bool DisposeSession { get; set; } = false;
+
+        /// <summary>
+        /// Clear with this color on render.
+        /// </summary>
+        public Color? ClearOnRenderColor { get; set; } = null;
 
         /// <summary>
         /// Constructor.
@@ -51,7 +56,10 @@ namespace Ipatov.MarkupRender.Direct2D
         /// <param name="renderMap">Map.</param>
         public void Render(IRenderMeasureMap renderMap)
         {
-            _drawingSession.Clear(Colors.Transparent);
+            if (ClearOnRenderColor != null)
+            {
+                _drawingSession.Clear(ClearOnRenderColor.Value);
+            }
             if (renderMap != null)
             {
                 DoRender(renderMap);

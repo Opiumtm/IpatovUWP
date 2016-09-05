@@ -117,5 +117,14 @@ namespace Ipatov.MarkupRender.Test
                 }
             }
         }
+
+        private void UIElement_OnRightTapped(object sender, RightTappedRoutedEventArgs e)
+        {
+            var mf = new MenuFlyout();
+            mf.Items.Add(new MenuFlyoutItem() { Text = "Menu item 1"});
+            mf.Items.Add(new MenuFlyoutItem() { Text = "Menu item 2" });
+            mf.Items.Add(new MenuFlyoutItem() { Text = "Menu item 3" });
+            mf.ShowAt(this, e.GetPosition(this));
+        }
     }
 }
