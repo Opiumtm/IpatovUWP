@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
+using Windows.Devices.Enumeration;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.Graphics.Display;
@@ -36,15 +37,8 @@ namespace Ipatov.MarkupRender
 
         private readonly IRenderTextLayoutSource _layoutSource = new RenderTextLayoutSource();
 
-        private DisplayInformation _diHandle;
-
-        private float _dpi = 96f;
-
         private IRenderMeasureMap _measureMap;
 
-        private CanvasImageSource _imageSource;
-
-        private CanvasDevice _device;
 
         public MarkupRenderControl()
         {
@@ -52,33 +46,6 @@ namespace Ipatov.MarkupRender
             Loaded += MarkupRenderControl_OnLoaded;
             Unloaded += MarkupRenderControl_OnUnloaded;
             SizeChanged += MarkupRenderControl_OnSizeChanged;
-            _diHandle = DisplayInformation.GetForCurrentView();
-            _dpi = _diHandle?.LogicalDpi ?? 96f;
-            if (_diHandle != null)
-            {
-                _diHandle.DpiChanged += OnDpiChanged;
-            }
-            EnsureDevice();
-        }
-
-        private void EnsureDevice()
-        {
-            if (_device == null)
-            {
-                _device = CanvasDevice.GetSharedDevice();
-                _device.DeviceLost += DeviceOnDeviceLost;
-            }
-        }
-
-        private void DeviceOnDeviceLost(CanvasDevice sender, object args)
-        {
-            sender.DeviceLost -= DeviceOnDeviceLost;
-            DispatchAction(() =>
-            {
-                _device = null;
-                InvalidateImageSource(_measureMap?.Bounds ?? new Size(0, 0), true);
-                RenderMap();
-            });
         }
 
         private void DispatchAction(Action a)
@@ -108,8 +75,8 @@ namespace Ipatov.MarkupRender
             try
             {
                 _measureMap = map;
-                InvalidateImageSource(map?.Bounds ?? new Size(0,0), false);
-                RenderMap();
+                InvalidateImageSource(map?.Bounds ?? new Size(0,0), false, false);
+                RenderHost.Invalidate();
                 var unwaitedTask = Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
                 {
                     ExceedsLines = map?.ExceedLines ?? false;
@@ -130,7 +97,7 @@ namespace Ipatov.MarkupRender
             return (float)ActualWidth;
         }
 
-        private void InvalidateData(IMarkupRenderData renderData, float width, float dpi)
+        private void InvalidateData(IMarkupRenderData renderData, float width)
         {
             try
             {
@@ -144,7 +111,8 @@ namespace Ipatov.MarkupRender
                     {
                         IRenderMeasureMap map = null;
                         var device = CanvasDevice.GetSharedDevice();
-                        using (var t = new CanvasRenderTarget(device, (float)width, 10f, dpi))
+                        var di = DisplayInformation.GetForCurrentView();
+                        using (var t = new CanvasRenderTarget(device, (float)width, 10f, di.LogicalDpi))
                         {
                             using (var layout = _layoutSource.CreateLayout(renderData.Commands, t, renderData.Style, width))
                             {
@@ -165,28 +133,16 @@ namespace Ipatov.MarkupRender
             }
         }
 
-        private void RenderMap()
+        private void RenderMap(CanvasDrawingSession session, Rect r)
         {
             try
             {
-                if (_imageSource != null && _measureMap != null && _imageSource.Size.Width > 15)
+                session.Clear(Colors.Transparent);
+                if (_measureMap != null)
                 {
-                    var imageSource = _imageSource;
-                    var map = _measureMap;
-                    using (var session = imageSource.CreateDrawingSession(Colors.Transparent))
+                    using (var renderer = new Direct2DMapRenderer(session, r) {DisposeSession = false})
                     {
-                        using (var renderer = new Direct2DMapRenderer(session))
-                        {
-                            session.Clear(Colors.Transparent);
-                            renderer.Render(map);
-                        }
-                    }
-                } else if (_imageSource != null)
-                {
-                    var imageSource = _imageSource;
-                    using (var session = imageSource.CreateDrawingSession(Colors.Transparent))
-                    {
-                        session.Clear(Colors.Transparent);
+                        renderer.Render(_measureMap);
                     }
                 }
             }
@@ -198,23 +154,16 @@ namespace Ipatov.MarkupRender
 
         private Size? _mapSize;
 
-        private void InvalidateImageSource(Size mapSize, bool force)
+        private void InvalidateImageSource(Size mapSize, bool force, bool invalidate)
         {
             if (_mapSize != mapSize || force)
             {
                 _mapSize = mapSize;
-                if (mapSize.Height < 1 || mapSize.Width < 1)
+                RenderHost.Width = Math.Max(10, mapSize.Width);
+                RenderHost.Height = Math.Max(10, mapSize.Height);
+                if (invalidate)
                 {
-                    _imageSource = null;
-                    ImageHost.Source = null;
-                }
-                else
-                {
-                    EnsureDevice();
-                    _imageSource = new CanvasImageSource(_device, (float)mapSize.Width, (float)mapSize.Height, _dpi);
-                    ImageHost.Source = _imageSource;
-                    ImageHost.Width = mapSize.Width;
-                    ImageHost.Height = mapSize.Height;
+                    RenderHost.Invalidate();
                 }
             }
         }
@@ -236,7 +185,7 @@ namespace Ipatov.MarkupRender
                 StyleObjectChanged(renderData?.Style);
                 if (!_isUnloaded)
                 {
-                    InvalidateData(renderData, GetActualWidth(), _dpi);
+                    InvalidateData(renderData, GetActualWidth());
                 }
             });
         }
@@ -264,12 +213,12 @@ namespace Ipatov.MarkupRender
                 {
                     if (e.PropertyName == nameof(IMarkupRenderData.Commands))
                     {
-                        InvalidateData(RenderData, GetActualWidth(), _dpi);
+                        InvalidateData(RenderData, GetActualWidth());
                     }
                     if (e.PropertyName == nameof(IMarkupRenderData.Style))
                     {
                         StyleObjectChanged(RenderData?.Style);
-                        InvalidateData(RenderData, GetActualWidth(), _dpi);
+                        InvalidateData(RenderData, GetActualWidth());
                     }
                 }
             });
@@ -279,7 +228,7 @@ namespace Ipatov.MarkupRender
         {
             DispatchAction(() =>
             {
-                InvalidateData(RenderData, GetActualWidth(), _dpi);
+                InvalidateData(RenderData, GetActualWidth());
             });
         }
 
@@ -326,33 +275,14 @@ namespace Ipatov.MarkupRender
         private void MarkupRenderControl_OnUnloaded(object sender, RoutedEventArgs e)
         {
             _isUnloaded = true;
-            if (_diHandle != null)
-            {
-                _diHandle.DpiChanged -= OnDpiChanged;
-                _diHandle = null;
-            }
-            if (_device != null)
-            {
-                _device.DeviceLost -= DeviceOnDeviceLost;
-                _device = null;
-            }
-            ImageHost.Source = null;
-            _imageSource = null;
             RenderData = null;
+            RenderHost.RemoveFromVisualTree();
+            RenderHost = null;
         }
 
         private void MarkupRenderControl_OnLoaded(object sender, RoutedEventArgs e)
         {
-            InvalidateData(RenderData, GetActualWidth(), _dpi);
-        }
-
-        private void OnDpiChanged(DisplayInformation sender, object args)
-        {
-            DispatchAction(() =>
-            {
-                _dpi = _diHandle?.LogicalDpi ?? 96f;
-                InvalidateData(RenderData, GetActualWidth(), _dpi);
-            });
+            InvalidateData(RenderData, GetActualWidth());
         }
 
         private float? _width;
@@ -365,7 +295,7 @@ namespace Ipatov.MarkupRender
                 if (w != _width)
                 {
                     _width = w;
-                    InvalidateData(RenderData, w, _dpi);
+                    InvalidateData(RenderData, w);
                 }
             });
         }
@@ -374,7 +304,7 @@ namespace Ipatov.MarkupRender
         {
             if (_measureMap != null)
             {
-                var pos = e.GetPosition(ImageHost);
+                var pos = e.GetPosition(RenderHost);
                 var command = _measureMap.TextAt(pos);
                 if (command != null)
                 {
@@ -402,5 +332,16 @@ namespace Ipatov.MarkupRender
         /// ExceedsLines property changed.
         /// </summary>
         public event EventHandler ExceedsLinesChanged;
+
+        private void RenderHost_OnRegionsInvalidated(CanvasVirtualControl sender, CanvasRegionsInvalidatedEventArgs args)
+        {
+            foreach (var r in args.InvalidatedRegions)
+            {
+                using (var session = sender.CreateDrawingSession(r))
+                {
+                    RenderMap(session, r);
+                }
+            }
+        }
     }
 }

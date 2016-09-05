@@ -12,6 +12,6 @@
     >
 
     <Grid>
-        <Image x:Name="ImageHost" Margin="0" HorizontalAlignment="Left" VerticalAlignment="Top" Stretch="Fill" Tapped="ImageHost_OnTapped" />
+        <d2d:CanvasVirtualControl x:Name="RenderHost" RegionsInvalidated="RenderHost_OnRegionsInvalidated" Tapped="ImageHost_OnTapped" />
     </Grid>
 </UserControl>

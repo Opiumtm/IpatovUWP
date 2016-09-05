@@ -16,6 +16,13 @@ namespace Ipatov.MarkupRender.Direct2D
     {
         private readonly CanvasDrawingSession _drawingSession;
 
+        private readonly Rect? _invalidatedRect;
+
+        /// <summary>
+        /// Dispose drawing session.
+        /// </summary>
+        public bool DisposeSession { get; set; } = true;
+
         /// <summary>
         /// Constructor.
         /// </summary>
@@ -24,6 +31,18 @@ namespace Ipatov.MarkupRender.Direct2D
         {
             if (drawingSession == null) throw new ArgumentNullException(nameof(drawingSession));
             _drawingSession = drawingSession;
+        }
+
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="drawingSession">Drawing session.</param>
+        /// <param name="invalidatedRect">Invalidated rectangle.</param>
+        public Direct2DMapRenderer(CanvasDrawingSession drawingSession, Rect invalidatedRect)
+        {
+            if (drawingSession == null) throw new ArgumentNullException(nameof(drawingSession));
+            _drawingSession = drawingSession;
+            _invalidatedRect = invalidatedRect;
         }
 
         /// <summary>
@@ -53,6 +72,16 @@ namespace Ipatov.MarkupRender.Direct2D
                 }
                 foreach (var el in line.GetMeasureMap())
                 {
+                    if (_invalidatedRect != null)
+                    {
+                        var invalidatedRect = _invalidatedRect.Value;
+                        var bounds = new Rect(el.Placement, el.Size);
+                        bounds.Intersect(invalidatedRect);
+                        if (bounds.IsEmpty)
+                        {
+                            continue;
+                        }
+                    }
                     RenderElement(el, formatCache, map.Style, line.Height);
                 }
             }
@@ -212,7 +241,10 @@ namespace Ipatov.MarkupRender.Direct2D
         /// </summary>
         public void Dispose()
         {
-            _drawingSession.Dispose();
+            if (DisposeSession)
+            {
+                _drawingSession.Dispose();
+            }
         }
     }
 }
