@@ -36,19 +36,19 @@ namespace Ipatov.MarkupRender.Test
         {
             var p = new RenderProgramCommandsFormer();
             p.Push(CommonProgramElements.PrintTextElement(Ipsum));
-            p.Push(CommonProgramElements.LinkeBreakElement);
-            p.Push(CommonProgramElements.LinkeBreakElement);
+            p.Push(CommonProgramElements.LineBreakElement);
+            p.Push(CommonProgramElements.LineBreakElement);
             p.Push(CommonProgramElements.AddAttributeElement(CommonTextAttributes.BoldAttribute));
             p.Push(CommonProgramElements.PrintTextElement(Ipsum));
             p.Push(CommonProgramElements.RemoveAttributeElement(CommonTextAttributes.BoldAttribute));
-            p.Push(CommonProgramElements.LinkeBreakElement);
-            p.Push(CommonProgramElements.LinkeBreakElement);
+            p.Push(CommonProgramElements.LineBreakElement);
+            p.Push(CommonProgramElements.LineBreakElement);
             var link = CommonTextAttributes.CreateLink(new Uri("http://yandex.ru/"));
             p.Push(CommonProgramElements.AddAttributeElement(link));
             p.Push(CommonProgramElements.PrintTextElement("Перейти по ссылке"));
             p.Push(CommonProgramElements.RemoveAttributeElement(link));
-            p.Push(CommonProgramElements.LinkeBreakElement);
-            p.Push(CommonProgramElements.LinkeBreakElement);
+            p.Push(CommonProgramElements.LineBreakElement);
+            p.Push(CommonProgramElements.LineBreakElement);
             p.Push(CommonProgramElements.AddAttributeElement(CommonTextAttributes.StrikethroughAttribute));
             p.Push(CommonProgramElements.PrintTextElement("Зачёркнутый текст"));
             p.Push(CommonProgramElements.RemoveAttributeElement(CommonTextAttributes.StrikethroughAttribute));
@@ -77,8 +77,8 @@ namespace Ipatov.MarkupRender.Test
             p.Push(CommonProgramElements.PrintTextElement("1"));
             p.Push(CommonProgramElements.RemoveAttributeElement(CommonTextAttributes.SubscriptAttribute));
             p.Push(CommonProgramElements.RemoveAttributeElement(CommonTextAttributes.StrikethroughAttribute));
-            p.Push(CommonProgramElements.LinkeBreakElement);
-            p.Push(CommonProgramElements.LinkeBreakElement);
+            p.Push(CommonProgramElements.LineBreakElement);
+            p.Push(CommonProgramElements.LineBreakElement);
             p.Push(CommonProgramElements.AddAttributeElement(CommonTextAttributes.FixedAttribute));
             p.Push(CommonProgramElements.PrintTextElement(Ipsum));
             p.Push(CommonProgramElements.RemoveAttributeElement(CommonTextAttributes.FixedAttribute));

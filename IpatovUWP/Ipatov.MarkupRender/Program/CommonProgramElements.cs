@@ -58,6 +58,6 @@
         /// <summary>
         /// Line break.
         /// </summary>
-        public static readonly IRenderProgramElement LinkeBreakElement = new LineBreakRenderProgramElement();
+        public static readonly IRenderProgramElement LineBreakElement = new LineBreakRenderProgramElement();
     }
 }
