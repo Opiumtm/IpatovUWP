@@ -44,6 +44,8 @@ namespace Ipatov.MarkupRender
 
         private CanvasImageSource _imageSource;
 
+        private CanvasDevice _device;
+
         public MarkupRenderControl()
         {
             this.InitializeComponent();
@@ -52,57 +54,56 @@ namespace Ipatov.MarkupRender
             SizeChanged += MarkupRenderControl_OnSizeChanged;
         }
 
-        private void DispatchAction(Action a)
+        private void EnsureDevice()
         {
-            var unwaitedTask = Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+            if (_device == null)
             {
-                try
-                {
-                    a?.Invoke();
-                }
-                catch
-                {
-                }
+                _device = CanvasDevice.GetSharedDevice();
+                _device.DeviceLost += DeviceOnDeviceLost;
+            }
+        }
+
+        private void DeviceOnDeviceLost(CanvasDevice sender, object args)
+        {
+            sender.DeviceLost -= DeviceOnDeviceLost;
+            DispatchAction(() =>
+            {
+                _device = null;
+                InvalidateImageSource(_measureMap?.Bounds ?? new Size(0, 0), true);
+                RenderMap();
             });
         }
 
-        private async Task<Tuple<IRenderMeasureMap, CanvasImageSource>> GetMapAndSwapChain()
+        private void DispatchAction(Action a)
         {
             if (Dispatcher.HasThreadAccess)
             {
-                return new Tuple<IRenderMeasureMap, CanvasImageSource>(_measureMap, _imageSource);
+                a?.Invoke();
             }
             else
             {
-                Tuple<IRenderMeasureMap, CanvasImageSource> result = null;
-                await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+                var unwaitedTask = Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
                 {
-                    result = new Tuple<IRenderMeasureMap, CanvasImageSource>(_measureMap, _imageSource);
+                    try
+                    {
+                        a?.Invoke();
+                    }
+                    catch
+                    {
+                    }
                 });
-                return result;
+
             }
         }
 
-        private async Task SetMap(IRenderMeasureMap map)
+        private void SetMap(IRenderMeasureMap map)
         {
             try
             {
-                if (Dispatcher.HasThreadAccess)
-                {
-                    _measureMap = map;
-                    InvalidateImageSource(map?.Bounds ?? new Size(0,0));
-                    await RenderMap();
-                }
-                else
-                {
-                    await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
-                    {
-                        _measureMap = map;
-                        InvalidateImageSource(map?.Bounds ?? new Size(0, 0));
-                    });
-                    await RenderMap();
-                }
-                DispatchAction(() =>
+                _measureMap = map;
+                InvalidateImageSource(map?.Bounds ?? new Size(0,0), false);
+                RenderMap();
+                var unwaitedTask = Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
                 {
                     ExceedsLines = map?.ExceedLines ?? false;
                 });
@@ -122,7 +123,7 @@ namespace Ipatov.MarkupRender
             return (float)ActualWidth;
         }
 
-        private async void InvalidateData(IMarkupRenderData renderData, float width, float dpi)
+        private void InvalidateData(IMarkupRenderData renderData, float width, float dpi)
         {
             try
             {
@@ -130,28 +131,25 @@ namespace Ipatov.MarkupRender
                 {
                     if (width < 1f)
                     {
-                        await SetMap(null);
+                        SetMap(null);
                     }
                     else
                     {
                         IRenderMeasureMap map = null;
-                        await Task.Factory.StartNew(() =>
+                        var device = CanvasDevice.GetSharedDevice();
+                        using (var t = new CanvasRenderTarget(device, (float)width, 10f, dpi))
                         {
-                            var device = CanvasDevice.GetSharedDevice();
-                            using (var t = new CanvasRenderTarget(device, (float)width, 10f, dpi))
+                            using (var layout = _layoutSource.CreateLayout(renderData.Commands, t, renderData.Style, width))
                             {
-                                using (var layout = _layoutSource.CreateLayout(renderData.Commands, t, renderData.Style, width))
-                                {
-                                    map = _mapper.MapLayout(layout);
-                                }
+                                map = _mapper.MapLayout(layout);
                             }
-                        });
-                        await SetMap(map);
+                        }
+                        SetMap(map);
                     }
                 }
                 else
                 {
-                    await SetMap(null);
+                    SetMap(null);
                 }
             }
             catch
@@ -160,34 +158,30 @@ namespace Ipatov.MarkupRender
             }
         }
 
-        private async Task RenderMap()
+        private void RenderMap()
         {
             try
             {
-                var par = await GetMapAndSwapChain();
-                await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+                if (_imageSource != null && _measureMap != null && _imageSource.Size.Width > 15)
                 {
-                    if (par?.Item1 != null && par?.Item2 != null && par.Item2.Size.Width > 15)
+                    var imageSource = _imageSource;
+                    var map = _measureMap;
+                    using (var session = imageSource.CreateDrawingSession(Colors.Transparent))
                     {
-                        var swapChain = par.Item2;
-                        var map = par.Item1;
-                        using (var session = swapChain.CreateDrawingSession(Colors.Transparent))
-                        {
-                            using (var renderer = new Direct2DMapRenderer(session))
-                            {
-                                session.Clear(Colors.Transparent);
-                                renderer.Render(map);
-                            }
-                        }
-                    } else if (par?.Item2 != null)
-                    {
-                        var swapChain = par.Item2;
-                        using (var session = swapChain.CreateDrawingSession(Colors.Transparent))
+                        using (var renderer = new Direct2DMapRenderer(session))
                         {
                             session.Clear(Colors.Transparent);
+                            renderer.Render(map);
                         }
                     }
-                });
+                } else if (_imageSource != null)
+                {
+                    var imageSource = _imageSource;
+                    using (var session = imageSource.CreateDrawingSession(Colors.Transparent))
+                    {
+                        session.Clear(Colors.Transparent);
+                    }
+                }
             }
             catch
             {
@@ -197,9 +191,9 @@ namespace Ipatov.MarkupRender
 
         private Size? _mapSize;
 
-        private void InvalidateImageSource(Size mapSize)
+        private void InvalidateImageSource(Size mapSize, bool force)
         {
-            if (_mapSize != mapSize)
+            if (_mapSize != mapSize || force)
             {
                 _mapSize = mapSize;
                 if (mapSize.Height < 1 || mapSize.Width < 1)
@@ -209,7 +203,8 @@ namespace Ipatov.MarkupRender
                 }
                 else
                 {
-                    _imageSource = new CanvasImageSource(CanvasDevice.GetSharedDevice(), (float)mapSize.Width, (float)mapSize.Height, _dpi);
+                    EnsureDevice();
+                    _imageSource = new CanvasImageSource(_device, (float)mapSize.Width, (float)mapSize.Height, _dpi);
                     ImageHost.Source = _imageSource;
                     ImageHost.Width = mapSize.Width;
                     ImageHost.Height = mapSize.Height;
@@ -329,6 +324,11 @@ namespace Ipatov.MarkupRender
                 _diHandle.DpiChanged -= OnDpiChanged;
                 _diHandle = null;
             }
+            if (_device != null)
+            {
+                _device.DeviceLost -= DeviceOnDeviceLost;
+                _device = null;
+            }
             ImageHost.Source = null;
             _imageSource = null;
             RenderData = null;
@@ -342,6 +342,7 @@ namespace Ipatov.MarkupRender
             {
                 _diHandle.DpiChanged += OnDpiChanged;
             }
+            EnsureDevice();
             InvalidateData(RenderData, GetActualWidth(), _dpi);
         }
 
