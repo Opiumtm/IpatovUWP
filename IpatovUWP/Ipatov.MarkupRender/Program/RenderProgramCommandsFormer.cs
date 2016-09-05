@@ -13,7 +13,7 @@ namespace Ipatov.MarkupRender
 
         private readonly List<IRenderCommand> _result = new List<IRenderCommand>();
 
-        private readonly object Lock = new object();
+        private readonly object _lock = new object();
 
         /// <summary>
         /// Push program element.
@@ -21,7 +21,7 @@ namespace Ipatov.MarkupRender
         /// <param name="element">Element.</param>
         public void Push(IRenderProgramElement element)
         {
-            lock (Lock)
+            lock (_lock)
             {
                 if (!_internalFormer.AddElement(element))
                 {
@@ -36,7 +36,7 @@ namespace Ipatov.MarkupRender
         /// </summary>
         public void Clear()
         {
-            lock (Lock)
+            lock (_lock)
             {
                 _internalFormer.Clear();
                 _result.Clear();
@@ -48,7 +48,7 @@ namespace Ipatov.MarkupRender
         /// </summary>
         public void Flush()
         {
-            lock (Lock)
+            lock (_lock)
             {
                 var command = _internalFormer.GetCommand();
                 if (command != null)
@@ -65,7 +65,7 @@ namespace Ipatov.MarkupRender
         /// <returns>Render commands.</returns>
         public IReadOnlyList<IRenderCommand> GetCommands()
         {
-            lock (Lock)
+            lock (_lock)
             {
                 return _result.ToArray();
             }
