@@ -186,7 +186,7 @@ namespace Ipatov.MarkupRender.Direct2D
                 }
                 if (attr.ContainsKey(CommonTextAttributes.Undeline))
                 {
-                    flags |= TextAttributeFlags.Overline;
+                    flags |= TextAttributeFlags.Undeline;
                 }
                 if (attr.ContainsKey(CommonTextAttributes.Quote))
                 {
