@@ -275,9 +275,12 @@ namespace Ipatov.MarkupRender
         private void MarkupRenderControl_OnUnloaded(object sender, RoutedEventArgs e)
         {
             _isUnloaded = true;
-            RenderData = null;
+            Loaded -= MarkupRenderControl_OnLoaded;
+            Unloaded -= MarkupRenderControl_OnUnloaded;
+            SizeChanged -= MarkupRenderControl_OnSizeChanged;
             RenderHost?.RemoveFromVisualTree();
             RenderHost = null;
+            RenderData = null;
         }
 
         private void MarkupRenderControl_OnLoaded(object sender, RoutedEventArgs e)
