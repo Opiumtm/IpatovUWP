@@ -1,8 +1,6 @@
 ﻿{
   "dependencies": {
-    "Ipatov.MarkupRender": "1.0.1",
-    "Microsoft.NETCore.UniversalWindowsPlatform": "5.2.2",
-    "Win2D.uwp": "1.19.0"
+    "Microsoft.NETCore.UniversalWindowsPlatform": "5.1.0"
   },
   "frameworks": {
     "uap10.0": {}
