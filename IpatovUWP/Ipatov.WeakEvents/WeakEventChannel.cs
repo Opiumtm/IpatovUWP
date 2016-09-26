@@ -30,6 +30,7 @@ namespace Ipatov.WeakEvents
             try
             {
                 var channels = new List<WeakEventChannel>();
+                var toDelete = new List<WeakReference<WeakEventChannel>>();
                 lock (Channels)
                 {
                     foreach (var channel in Channels)
@@ -39,6 +40,14 @@ namespace Ipatov.WeakEvents
                         {
                             channels.Add(c);
                         }
+                        else
+                        {
+                            toDelete.Add(channel);
+                        }
+                    }
+                    foreach (var channel in toDelete)
+                    {
+                        Channels.Remove(channel);
                     }
                 }
                 foreach (var channel in channels)
