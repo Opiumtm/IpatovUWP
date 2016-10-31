@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
+using Windows.ApplicationModel;
 using Windows.Devices.Enumeration;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
@@ -39,6 +40,8 @@ namespace Ipatov.MarkupRender
 
         private IRenderMeasureMap _measureMap;
 
+        private readonly bool _isResumedSet;
+
 
         public MarkupRenderControl()
         {
@@ -46,6 +49,44 @@ namespace Ipatov.MarkupRender
             Loaded += MarkupRenderControl_OnLoaded;
             Unloaded += MarkupRenderControl_OnUnloaded;
             SizeChanged += MarkupRenderControl_OnSizeChanged;
+            if (Application.Current != null)
+            {
+                if (Windows.Foundation.Metadata.ApiInformation.IsEventPresent("Windows.UI.Xaml.Application", nameof(Application.LeavingBackground)))
+                {
+                    Application.Current.LeavingBackground += CurrentOnLeavingBackground;
+                }
+                else
+                {
+                    Application.Current.Resuming += CurrentOnResuming;
+                }
+                _isResumedSet = true;
+            }
+        }
+
+        private void CurrentOnResuming(object sender, object o)
+        {
+            var unwaitedTask = Dispatcher.RunAsync(CoreDispatcherPriority.Normal, WaitAndInvalidate);
+        }
+
+        private void CurrentOnLeavingBackground(object sender, LeavingBackgroundEventArgs leavingBackgroundEventArgs)
+        {
+            var unwaitedTask = Dispatcher.RunAsync(CoreDispatcherPriority.Normal, WaitAndInvalidate);
+        }
+
+        private async void WaitAndInvalidate()
+        {
+            try
+            {
+                await Task.Delay(TimeSpan.FromSeconds(1.5));
+                InvalidateImageSource(_mapSize ?? new Size(0, 0), true, true);
+            }
+            catch (Exception ex)
+            {
+                if (Debugger.IsAttached)
+                {
+                    Debugger.Break();
+                }
+            }
         }
 
         private void DispatchAction(Action a)
@@ -281,6 +322,17 @@ namespace Ipatov.MarkupRender
             RenderHost?.RemoveFromVisualTree();
             RenderHost = null;
             RenderData = null;
+            if (_isResumedSet)
+            {
+                if (Windows.Foundation.Metadata.ApiInformation.IsEventPresent("Windows.UI.Xaml.Application", nameof(Application.LeavingBackground)))
+                {
+                    Application.Current.LeavingBackground -= CurrentOnLeavingBackground;
+                }
+                else
+                {
+                    Application.Current.Resuming -= CurrentOnResuming;
+                }
+            }
         }
 
         private void MarkupRenderControl_OnLoaded(object sender, RoutedEventArgs e)

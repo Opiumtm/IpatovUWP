@@ -126,6 +126,12 @@
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Ipatov.MarkupRender\Ipatov.MarkupRender.csproj">
+      <Project>{9cfe9a8d-b88c-4ee0-820d-c8ef020d11d2}</Project>
+      <Name>Ipatov.MarkupRender</Name>
+    </ProjectReference>
+  </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>
   </PropertyGroup>
