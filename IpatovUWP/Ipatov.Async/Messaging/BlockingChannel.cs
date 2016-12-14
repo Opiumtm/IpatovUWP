@@ -31,9 +31,9 @@ namespace Ipatov.Async.Messaging
         }
 
         /// <inheritdoc />
-        public Task<IAsyncMessage<TMsg, TReply>> Receive()
+        public Task<IAsyncMessage<TMsg, TReply>> Receive(int priority = 0)
         {
-            return Receive(new CancellationToken());
+            return Receive(new CancellationToken(), priority);
         }
 
         /// <inheritdoc />
@@ -51,13 +51,13 @@ namespace Ipatov.Async.Messaging
             var message = new AsyncMessage<TMsg, TReply>(msg, token, priority, StateChangedCallback);
             lock (_stateLock)
             {
-                if (_waiters.Count > 0)
+                var waiter = _waiters.OrderByDescending(w => w.Priority).FirstOrDefault();
+                if (waiter != null)
                 {
-                    var waiter = _waiters[0];
-                    _waiters.RemoveAt(0);
+                    _waiters.Remove(waiter);
                     toExecute.Add(() =>
                     {
-                        waiter.TrySetResult(message);
+                        waiter.Waiter.TrySetResult(message);
                     });
                 }
                 else
@@ -81,7 +81,7 @@ namespace Ipatov.Async.Messaging
         }
 
         /// <inheritdoc />
-        public Task<IAsyncMessage<TMsg, TReply>> Receive(CancellationToken token)
+        public Task<IAsyncMessage<TMsg, TReply>> Receive(CancellationToken token, int priority = 0)
         {
             if (token.IsCancellationRequested)
             {
@@ -105,7 +105,12 @@ namespace Ipatov.Async.Messaging
                 else
                 {
                     var tcs = new TaskCompletionSource<IAsyncMessage<TMsg, TReply>>();
-                    _waiters.Add(tcs);
+                    var waiter = new WaiterInfo()
+                    {
+                        Priority = priority,
+                        Waiter = tcs
+                    };
+                    _waiters.Add(waiter);
                     toExecute.Add(() =>
                     {
                         token.Register(() =>
@@ -113,7 +118,7 @@ namespace Ipatov.Async.Messaging
                             tcs.TrySetCanceled(token);
                             lock (_stateLock)
                             {
-                                _waiters.Remove(tcs);
+                                _waiters.Remove(waiter);
                             }
                         });
                     });
@@ -131,6 +136,12 @@ namespace Ipatov.Async.Messaging
 
         private readonly List<AsyncMessage<TMsg, TReply>> _incoming = new List<AsyncMessage<TMsg, TReply>>();
 
-        private readonly List<TaskCompletionSource<IAsyncMessage<TMsg, TReply>>> _waiters = new List<TaskCompletionSource<IAsyncMessage<TMsg, TReply>>>();
+        private readonly List<WaiterInfo> _waiters = new List<WaiterInfo>();
+
+        private class WaiterInfo
+        {
+            public int Priority;
+            public TaskCompletionSource<IAsyncMessage<TMsg, TReply>> Waiter;
+        }
     }
 }

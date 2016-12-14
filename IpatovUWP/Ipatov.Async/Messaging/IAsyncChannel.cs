@@ -22,8 +22,9 @@ namespace Ipatov.Async.Messaging
         /// <summary>
         /// Receive message.
         /// </summary>
+        /// <param name="priority">Message priority.</param>
         /// <returns>Async message.</returns>
-        Task<IAsyncMessage<TMsg, TReply>> Receive();
+        Task<IAsyncMessage<TMsg, TReply>> Receive(int priority = 0);
 
         /// <summary>
         /// Send message.
@@ -38,7 +39,8 @@ namespace Ipatov.Async.Messaging
         /// Receive message.
         /// </summary>
         /// <param name="token">Cancellation token.</param>
+        /// <param name="priority">Priority.</param>
         /// <returns>Async message.</returns>
-        Task<IAsyncMessage<TMsg, TReply>> Receive(CancellationToken token);
+        Task<IAsyncMessage<TMsg, TReply>> Receive(CancellationToken token, int priority = 0);
     }
 }
