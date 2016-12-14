@@ -110,6 +110,7 @@
     <Compile Include="Messaging\AsyncMessage.cs" />
     <Compile Include="Messaging\AsyncMessageStateChange.cs" />
     <Compile Include="Messaging\BlockingChannel.cs" />
+    <Compile Include="Messaging\BlockingChannelDisposedMode.cs" />
     <Compile Include="Messaging\EmptyMessage.cs" />
     <Compile Include="Messaging\IAsyncChannel.cs" />
     <Compile Include="Messaging\IAsyncMessage.cs" />

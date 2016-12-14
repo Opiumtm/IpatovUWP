@@ -13,6 +13,17 @@ namespace Ipatov.Async.Messaging
     {
         private int _isDisposed = 0;
 
+        private int _disposedMode = (int) BlockingChannelDisposedMode.Discard;
+
+        /// <summary>
+        /// Disposed mode.
+        /// </summary>
+        public BlockingChannelDisposedMode DisposedMode
+        {
+            get { return (BlockingChannelDisposedMode) Interlocked.CompareExchange(ref _disposedMode, 0, 0); }
+            set { Interlocked.Exchange(ref _disposedMode, (int) value); }
+        }
+
         /// <inheritdoc />
         public void Dispose()
         {
@@ -45,7 +56,15 @@ namespace Ipatov.Async.Messaging
             }
             if (IsDisposed())
             {
-                return Task.FromException<TReply>(new ObjectDisposedException(nameof(BlockingChannel<TMsg, TReply>)));
+                switch (DisposedMode)
+                {
+                    case BlockingChannelDisposedMode.ImmediateException:
+                        throw new ObjectDisposedException(nameof(BlockingChannel<TMsg, TReply>));
+                    case BlockingChannelDisposedMode.FaultedTask:
+                        return Task.FromException<TReply>(new ObjectDisposedException(nameof(BlockingChannel<TMsg, TReply>)));
+                    default:
+                        return Task.FromResult(default(TReply));
+                }                
             }
             var toExecute = new List<Action>();
             var message = new AsyncMessage<TMsg, TReply>(msg, token, priority, StateChangedCallback);
@@ -89,7 +108,15 @@ namespace Ipatov.Async.Messaging
             }
             if (IsDisposed())
             {
-                return Task.FromException<IAsyncMessage<TMsg, TReply>>(new ObjectDisposedException(nameof(BlockingChannel<TMsg, TReply>)));
+                switch (DisposedMode)
+                {
+                    case BlockingChannelDisposedMode.ImmediateException:
+                        throw new ObjectDisposedException(nameof(BlockingChannel<TMsg, TReply>));
+                    case BlockingChannelDisposedMode.FaultedTask:
+                        return Task.FromException<IAsyncMessage<TMsg, TReply>>(new ObjectDisposedException(nameof(BlockingChannel<TMsg, TReply>)));
+                    default:
+                        return Task.FromResult(default(IAsyncMessage<TMsg, TReply>));
+                }
             }
             var toExecute = new List<Action>();
             Task<IAsyncMessage<TMsg, TReply>> result;
