@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -16,9 +17,9 @@ namespace Ipatov.Async.Messaging
         }
 
         /// <inheritdoc />
-        public Task<TReply> Send(TMsg msg)
+        public Task<TReply> Send(TMsg msg, int priority = 0)
         {
-            return Send(msg, new CancellationToken());
+            return Send(msg, new CancellationToken(), priority);
         }
 
         /// <inheritdoc />
@@ -28,14 +29,14 @@ namespace Ipatov.Async.Messaging
         }
 
         /// <inheritdoc />
-        public Task<TReply> Send(TMsg msg, CancellationToken token)
+        public Task<TReply> Send(TMsg msg, CancellationToken token, int priority = 0)
         {
             if (token.IsCancellationRequested)
             {
                 return Task.FromCanceled<TReply>(token);
             }
             var toExecute = new List<Action>();
-            var message = new AsyncMessage<TMsg, TReply>(msg, token, StateChangedCallback);
+            var message = new AsyncMessage<TMsg, TReply>(msg, token, priority, StateChangedCallback);
             lock (_stateLock)
             {
                 if (_waiters.Count > 0)
@@ -78,11 +79,12 @@ namespace Ipatov.Async.Messaging
             Task<IAsyncMessage<TMsg, TReply>> result;
             lock (_stateLock)
             {
-                if (_incoming.Count > 0)
+                var message = _incoming.OrderByDescending(p => p.Priority).FirstOrDefault();
+                if (message != null)
                 {
-                    IAsyncMessage<TMsg, TReply> message = _incoming[0];
-                    _incoming.RemoveAt(0);
-                    result = Task.FromResult(message);
+                    _incoming.Remove(message);
+                    IAsyncMessage<TMsg, TReply> msg = message;
+                    result = Task.FromResult(msg);
                 }
                 else
                 {

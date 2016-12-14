@@ -15,8 +15,9 @@ namespace Ipatov.Async.Messaging
         /// Send message.
         /// </summary>
         /// <param name="msg">Message.</param>
+        /// <param name="priority">Message priority.</param>
         /// <returns>Reply.</returns>
-        Task<TReply> Send(TMsg msg);
+        Task<TReply> Send(TMsg msg, int priority = 0);
 
         /// <summary>
         /// Receive message.
@@ -29,8 +30,9 @@ namespace Ipatov.Async.Messaging
         /// </summary>
         /// <param name="msg">Message.</param>
         /// <param name="token">Cancellation token.</param>
+        /// <param name="priority">Message priority.</param>
         /// <returns>Reply.</returns>
-        Task<TReply> Send(TMsg msg, CancellationToken token);
+        Task<TReply> Send(TMsg msg, CancellationToken token, int priority = 0);
 
         /// <summary>
         /// Receive message.

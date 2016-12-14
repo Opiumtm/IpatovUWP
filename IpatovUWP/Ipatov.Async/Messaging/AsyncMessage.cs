@@ -16,10 +16,12 @@ namespace Ipatov.Async.Messaging
         /// </summary>
         /// <param name="data">Message.</param>
         /// <param name="token">Cancellation token.</param>
+        /// <param name="priority">Message priority.</param>
         /// <param name="stateChangedCallback">State changed callback.</param>
-        public AsyncMessage(TMsg data, CancellationToken token, Action<AsyncMessage<TMsg, TReply>, AsyncMessageStateChange> stateChangedCallback = null)
+        public AsyncMessage(TMsg data, CancellationToken token, int priority, Action<AsyncMessage<TMsg, TReply>, AsyncMessageStateChange> stateChangedCallback = null)
         {
             Data = data;
+            Priority = priority;
             _tcs = new TaskCompletionSource<TReply>();
             _stateChangedCallback = stateChangedCallback;
             token.Register(() =>
@@ -35,6 +37,9 @@ namespace Ipatov.Async.Messaging
 
         /// <inheritdoc />
         public TMsg Data { get; }
+
+        /// <inheritdoc />
+        public int Priority { get; }
 
         /// <inheritdoc />
         public void Reply(TReply msg)

@@ -15,6 +15,11 @@ namespace Ipatov.Async.Messaging
         TMsg Data { get; }
 
         /// <summary>
+        /// Priority.
+        /// </summary>
+        int Priority { get; }
+
+        /// <summary>
         /// Reply to sender.
         /// </summary>
         /// <param name="msg">Reply message.</param>
