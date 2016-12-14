@@ -11,9 +11,17 @@ namespace Ipatov.Async.Messaging
     /// </summary>
     public sealed class BlockingChannel<TMsg, TReply> : IAsyncChannel<TMsg, TReply>
     {
+        private int _isDisposed = 0;
+
         /// <inheritdoc />
         public void Dispose()
         {
+            Interlocked.Exchange(ref _isDisposed, 1);
+        }
+
+        private bool IsDisposed()
+        {
+            return Interlocked.CompareExchange(ref _isDisposed, 0, 0) != 0;
         }
 
         /// <inheritdoc />
@@ -34,6 +42,10 @@ namespace Ipatov.Async.Messaging
             if (token.IsCancellationRequested)
             {
                 return Task.FromCanceled<TReply>(token);
+            }
+            if (IsDisposed())
+            {
+                return Task.FromException<TReply>(new ObjectDisposedException(nameof(BlockingChannel<TMsg, TReply>)));
             }
             var toExecute = new List<Action>();
             var message = new AsyncMessage<TMsg, TReply>(msg, token, priority, StateChangedCallback);
@@ -74,6 +86,10 @@ namespace Ipatov.Async.Messaging
             if (token.IsCancellationRequested)
             {
                 return Task.FromCanceled<IAsyncMessage<TMsg, TReply>>(token);
+            }
+            if (IsDisposed())
+            {
+                return Task.FromException<IAsyncMessage<TMsg, TReply>>(new ObjectDisposedException(nameof(BlockingChannel<TMsg, TReply>)));
             }
             var toExecute = new List<Action>();
             Task<IAsyncMessage<TMsg, TReply>> result;
