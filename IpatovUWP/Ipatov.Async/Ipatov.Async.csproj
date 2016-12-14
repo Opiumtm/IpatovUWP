@@ -107,8 +107,17 @@
     <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Messaging\AsyncMessage.cs" />
+    <Compile Include="Messaging\AsyncMessageStateChange.cs" />
+    <Compile Include="Messaging\BlockingChannel.cs" />
+    <Compile Include="Messaging\EmptyMessage.cs" />
+    <Compile Include="Messaging\IAsyncChannel.cs" />
+    <Compile Include="Messaging\IAsyncMessage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Properties\Ipatov.Async.rd.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Infrastructure\" />
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>
