@@ -51,6 +51,7 @@
     <Compile Include="Primitives\AsyncScheduleQueue.cs" />
     <Compile Include="Primitives\AsyncSchedulePriority.cs" />
     <Compile Include="Primitives\AsyncSemaphore.cs" />
+    <Compile Include="Primitives\AsyncWaitEventBase.cs" />
     <Compile Include="Primitives\IAsyncAccessContext.cs" />
     <Compile Include="Primitives\IAsyncWaitEvent.cs" />
     <Compile Include="Primitives\IAsyncWaitContext.cs" />
