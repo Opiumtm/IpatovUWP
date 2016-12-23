@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Ipatov.Async.Primitives
@@ -9,10 +10,10 @@ namespace Ipatov.Async.Primitives
     public interface IAsyncWaitContext
     {
         /// <summary>
-        /// Wait on context.
+        /// Wait on async handle.
         /// </summary>
         /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns>Task to wait.</returns>
-        Task Wait(CancellationToken cancellationToken);
+        /// <returns>Task to wait with task handle.</returns>
+        Task<int> Wait(CancellationToken cancellationToken);
     }
 }

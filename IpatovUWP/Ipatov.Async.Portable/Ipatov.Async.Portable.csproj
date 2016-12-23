@@ -42,21 +42,20 @@
     <Compile Include="Infrastructure\ActionDisposable.cs" />
     <Compile Include="Infrastructure\ActionList.cs" />
     <Compile Include="Infrastructure\IDisposeCallback.cs" />
-    <Compile Include="Infrastructure\Nothing.cs" />
+    <Compile Include="Core\Nothing.cs" />
     <Compile Include="Messaging\IAsyncChannel.cs" />
     <Compile Include="Messaging\IAsyncMessage.cs" />
-    <Compile Include="Primitives\AsyncAutoResetEvent.cs" />
-    <Compile Include="Primitives\AsyncMutex.cs" />
-    <Compile Include="Primitives\AsyncMutexBase.cs" />
-    <Compile Include="Primitives\AsyncScheduleQueue.cs" />
-    <Compile Include="Primitives\AsyncSchedulePriority.cs" />
-    <Compile Include="Primitives\AsyncSemaphore.cs" />
-    <Compile Include="Primitives\AsyncWaitEventBase.cs" />
-    <Compile Include="Primitives\IAsyncAccessContext.cs" />
-    <Compile Include="Primitives\IAsyncWaitEvent.cs" />
+    <Compile Include="Primitives\AsyncAutoResetEventWrapper.cs" />
+    <Compile Include="Primitives\AsyncManualResetEventWrapper.cs" />
+    <Compile Include="Primitives\AsyncRegionReleaseHandle.cs" />
+    <Compile Include="Primitives\AsyncSemaphoreWrapper.cs" />
+    <Compile Include="Primitives\AsyncWaitContextHelpers.cs" />
+    <Compile Include="Primitives\IAsyncGate.cs" />
+    <Compile Include="Primitives\IAsyncSemaphore.cs" />
+    <Compile Include="Primitives\IAsyncSignal.cs" />
     <Compile Include="Primitives\IAsyncWaitContext.cs" />
-    <Compile Include="Primitives\IAsyncScheduler.cs" />
-    <Compile Include="Primitives\ThreadLoopScheduler.cs" />
+    <Compile Include="Primitives\IAsyncWaitRegion.cs" />
+    <Compile Include="Primitives\WaitHandleWrapper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
