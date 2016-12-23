@@ -46,9 +46,13 @@
     <Compile Include="Messaging\IAsyncChannel.cs" />
     <Compile Include="Messaging\IAsyncMessage.cs" />
     <Compile Include="Primitives\AsyncAutoResetEventWrapper.cs" />
+    <Compile Include="Primitives\AsyncGate.cs" />
     <Compile Include="Primitives\AsyncManualResetEventWrapper.cs" />
     <Compile Include="Primitives\AsyncRegionReleaseHandle.cs" />
     <Compile Include="Primitives\AsyncSemaphoreWrapper.cs" />
+    <Compile Include="Primitives\AsyncSignal.cs" />
+    <Compile Include="Primitives\AsyncSignalBase.cs" />
+    <Compile Include="Primitives\AsyncStatelessSignal.cs" />
     <Compile Include="Primitives\AsyncWaitContextHelpers.cs" />
     <Compile Include="Primitives\IAsyncGate.cs" />
     <Compile Include="Primitives\IAsyncSemaphore.cs" />
