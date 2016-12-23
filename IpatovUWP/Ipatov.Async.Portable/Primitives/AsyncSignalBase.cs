@@ -1,4 +1,6 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -9,7 +11,9 @@ namespace Ipatov.Async.Primitives
     /// </summary>
     public abstract class AsyncSignalBase : IAsyncSignal
     {
-        private readonly ConcurrentBag<TaskCompletionSource<int>> _waiters = new ConcurrentBag<TaskCompletionSource<int>>();
+        private List<TaskCompletionSource<int>> _waiters = new List<TaskCompletionSource<int>>();
+
+        private SpinLock _lock = new SpinLock();
 
         /// <summary>
         /// Wait on async handle.
@@ -19,8 +23,25 @@ namespace Ipatov.Async.Primitives
         public virtual async Task<int> Wait(CancellationToken cancellationToken)
         {
             var tcs = new TaskCompletionSource<int>();
-            _waiters.Add(tcs);
             var task = tcs.Task;
+            var taken = false;
+            _lock.Enter(ref taken);
+            if (taken)
+            {
+                try
+                {
+                    _waiters.Add(tcs);
+                }
+                finally
+                {
+                    _lock.Exit();
+                }
+            }
+            else
+            {
+                throw new InvalidOperationException("Unable to take spin lock");
+            }
+
             var ctr = cancellationToken.Register(() =>
             {
                 tcs.TrySetCanceled();
@@ -37,8 +58,27 @@ namespace Ipatov.Async.Primitives
         /// <returns>true if successful.</returns>
         public virtual bool Set()
         {
-            TaskCompletionSource<int> waiter;
-            while (_waiters.TryTake(out waiter))
+            var taken = false;
+            _lock.Enter(ref taken);
+            List<TaskCompletionSource<int>> watiers;
+            List<TaskCompletionSource<int>> newWaiters = new List<TaskCompletionSource<int>>();
+            if (taken)
+            {
+                try
+                {
+                    watiers = _waiters;
+                    _waiters = newWaiters;
+                }
+                finally
+                {
+                    _lock.Exit();
+                }
+            }
+            else
+            {
+                return false;
+            }
+            foreach (var waiter in watiers)
             {
                 waiter.TrySetResult(-1);
             }
