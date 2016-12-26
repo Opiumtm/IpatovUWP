@@ -47,6 +47,7 @@
     <Compile Include="Messaging\IAsyncMessage.cs" />
     <Compile Include="Primitives\AsyncAutoResetEventWrapper.cs" />
     <Compile Include="Primitives\AsyncGate.cs" />
+    <Compile Include="Primitives\AsyncLock.cs" />
     <Compile Include="Primitives\AsyncManualResetEventWrapper.cs" />
     <Compile Include="Primitives\AsyncRegionReleaseHandle.cs" />
     <Compile Include="Primitives\AsyncSemaphoreWrapper.cs" />
