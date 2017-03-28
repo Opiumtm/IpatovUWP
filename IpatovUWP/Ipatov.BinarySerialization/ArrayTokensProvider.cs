@@ -22,6 +22,7 @@ namespace Ipatov.BinarySerialization
         /// <returns>Tokens.</returns>
         public IEnumerable<SerializationProperty> GetProperties(T[] source, SerializationContext context)
         {
+            if (source == null) throw new ArgumentNullException(nameof(source));
             yield return new SerializationProperty()
             {
                 Property = "Count",
@@ -45,6 +46,7 @@ namespace Ipatov.BinarySerialization
         /// <returns>Object.</returns>
         public T[] CreateObject(IEnumerable<SerializationProperty> properties, SerializationContext context)
         {
+            if (properties == null) throw new ArgumentNullException(nameof(properties));
             T[] result = null;
             int idx = 0, len = 0;
             foreach (var property in properties)

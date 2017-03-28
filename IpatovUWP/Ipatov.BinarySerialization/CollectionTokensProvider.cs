@@ -42,6 +42,7 @@ namespace Ipatov.BinarySerialization
         /// <returns>Object.</returns>
         public T CreateObject(IEnumerable<SerializationProperty> properties, SerializationContext context)
         {
+            if (properties == null) throw new ArgumentNullException(nameof(properties));
             T result = new T();
             foreach (var property in properties)
             {
