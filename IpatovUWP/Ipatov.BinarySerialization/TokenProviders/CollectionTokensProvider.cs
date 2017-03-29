@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Ipatov.BinarySerialization
+namespace Ipatov.BinarySerialization.TokenProviders
 {
     /// <summary>
     /// Serialization tokens provider for generic collection.

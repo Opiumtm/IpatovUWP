@@ -1,7 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
-namespace Ipatov.BinarySerialization
+namespace Ipatov.BinarySerialization.TokenProviders
 {
     /// <summary>
     /// Wrapper for serialization tokens provider.

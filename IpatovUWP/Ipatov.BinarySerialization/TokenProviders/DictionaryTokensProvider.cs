@@ -2,11 +2,10 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace Ipatov.BinarySerialization
+namespace Ipatov.BinarySerialization.TokenProviders
 {
     /// <summary>
-    /// Serialization tokens provider for dictionary.
-    /// </summary>
+    /// Serialization tokens provider for dictionary./// </summary>
     /// <typeparam name="TKey">Type of key.</typeparam>
     /// <typeparam name="TValue">Type of value.</typeparam>
     /// <typeparam name="T">Type of dictionary.</typeparam>
