@@ -20,6 +20,6 @@ namespace Ipatov.BinarySerialization
         /// </summary>
         /// <param name="properties">Serialization tokens.</param>
         /// <param name="context">Serialization context.</param>
-        void FillProperties(IEnumerable<SerializationProperty> properties, SerializationContext context);
+        void FillProperties<TEnum>(TEnum properties, SerializationContext context) where TEnum : IEnumerable<SerializationProperty>;
     }
 }

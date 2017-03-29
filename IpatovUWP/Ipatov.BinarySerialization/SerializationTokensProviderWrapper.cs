@@ -27,7 +27,7 @@ namespace Ipatov.BinarySerialization
         /// <param name="properties">Serialization tokens.</param>
         /// <param name="context">Serialization context.</param>
         /// <returns>Object.</returns>
-        public T CreateObject(IEnumerable<SerializationProperty> properties, SerializationContext context)
+        public T CreateObject<TEnum>(TEnum properties, SerializationContext context) where TEnum : IEnumerable<SerializationProperty>
         {
             var result = new T();
             result.FillProperties(properties, context);

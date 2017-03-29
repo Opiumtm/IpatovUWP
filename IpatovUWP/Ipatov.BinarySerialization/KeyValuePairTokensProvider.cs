@@ -41,7 +41,7 @@ namespace Ipatov.BinarySerialization
         /// <param name="properties">Serialization tokens.</param>
         /// <param name="context">Serialization context.</param>
         /// <returns>Object.</returns>
-        public KeyValuePair<TKey, TValue> CreateObject<T>(T properties, SerializationContext context) where T : IEnumerable<SerializationProperty>
+        public KeyValuePair<TKey, TValue> CreateObject<TEnum>(TEnum properties, SerializationContext context) where TEnum : IEnumerable<SerializationProperty>
         {
             if (properties == null) throw new ArgumentNullException(nameof(properties));
             TKey key = default(TKey);
@@ -67,17 +67,6 @@ namespace Ipatov.BinarySerialization
                 return new KeyValuePair<TKey, TValue>(key, value);
             }
             throw new InvalidOperationException("Invalid serialization tokens for key/value pair.");
-        }
-
-        /// <summary>
-        /// Create object and fill its data from serialization tokens.
-        /// </summary>
-        /// <param name="properties">Serialization tokens.</param>
-        /// <param name="context">Serialization context.</param>
-        /// <returns>Object.</returns>
-        public KeyValuePair<TKey, TValue> CreateObject(IEnumerable<SerializationProperty> properties, SerializationContext context)
-        {
-            return CreateObject<IEnumerable<SerializationProperty>>(properties, context);
         }
     }
 }
