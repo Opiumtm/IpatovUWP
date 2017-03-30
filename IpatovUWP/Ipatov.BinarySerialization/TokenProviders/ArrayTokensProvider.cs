@@ -10,11 +10,6 @@ namespace Ipatov.BinarySerialization.TokenProviders
     public sealed class ArrayTokensProvider<T> : IExternalSerializationTokensProvider<T[]>
     {
         /// <summary>
-        /// Instance.
-        /// </summary>
-        public static readonly ArrayTokensProvider<T> Instance = new ArrayTokensProvider<T>();
-
-        /// <summary>
         /// Get tokens for object properties.
         /// </summary>
         /// <param name="source">Source object.</param>
@@ -71,7 +66,8 @@ namespace Ipatov.BinarySerialization.TokenProviders
                         {
                             throw new InvalidOperationException("Invalid token in array serialization. Items count > array size.");
                         }
-                        result[idx] = property.Token.ExtractValue<T>(context);
+                        var p = property.Token;
+                        result[idx] = context.ExtractValue<T>(ref p);
                         idx++;
                         break;
                 }

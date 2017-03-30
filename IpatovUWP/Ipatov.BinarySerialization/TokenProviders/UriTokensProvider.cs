@@ -46,11 +46,13 @@ namespace Ipatov.BinarySerialization.TokenProviders
             {
                 if (property.Property == "Uri")
                 {
-                    uri = property.Token.ExtractValue<string>(context);
+                    var p = property.Token;
+                    uri = context.ExtractValue<string>(ref p);
                 }
                 if (property.Property == "IsAbsolute")
                 {
-                    isAbsoulute = property.Token.ExtractValue<bool>(context);
+                    var p = property.Token;
+                    isAbsoulute = context.ExtractValue<bool>(ref p);
                 }
             }
             if (uri == null)

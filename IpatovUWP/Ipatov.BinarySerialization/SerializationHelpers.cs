@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using Ipatov.BinarySerialization.TokenProviders;
 
 namespace Ipatov.BinarySerialization
@@ -20,12 +22,8 @@ namespace Ipatov.BinarySerialization
         /// <returns>Cloned object.</returns>
         public static T DeepClone<T>(this T source, SerializationContext context)
         {
-            var tokensProvider = context.GetTokensProvider<T>();
-            if (tokensProvider == null)
-            {
-                throw new InvalidOperationException($"Serialization tokens provider not found for type {typeof(T).FullName}");
-            }
-            return tokensProvider.CreateObject(tokensProvider.GetProperties(source, context), context);
+            var serialized = source.CreateSerializationToken(context);
+            return context.ExtractValue<T>(ref serialized);
         }
 
         /// <summary>
@@ -35,7 +33,7 @@ namespace Ipatov.BinarySerialization
         /// <param name="token">Serialization token.</param>
         /// <param name="context">Reference cache.</param>
         /// <returns>Value.</returns>
-        public static T ExtractValue<T>(this SerializationToken token, SerializationContext context)
+        public static T ExtractValue<T>(this SerializationContext context, ref SerializationToken token)
         {
             if (token.TokenType == SerializationTokenType.Nothing)
             {
@@ -55,11 +53,16 @@ namespace Ipatov.BinarySerialization
                     {
                         throw new InvalidOperationException($"Deserialization error. Invalid reference index {r.ReferenceIndex}.");
                     }
+                    if (obj is T)
+                    {
+                        return (T)obj;
+                    }
+                    throw new InvalidOperationException($"Deserialization error. Incompatible type of cached reference. Expected {typeof(T).FullName}, actual {obj.GetType().FullName}.");
                 }
                 if (token.Reference is SerializedComplexType)
                 {
                     var c = (SerializedComplexType)token.Reference;
-                    var provider = context.GetTokensProvider<T>();
+                    var provider = GetComplexTypeTokensProvider<T>(context, c.ObjectType);
                     if (provider == null)
                     {
                         throw new InvalidOperationException($"Serialization tokens provider not found for type {typeof(T).FullName}");
@@ -80,7 +83,7 @@ namespace Ipatov.BinarySerialization
                     throw new InvalidOperationException($"Deserialization error. Object of type {c.ObjectType.FullName} is not subclass of expected type {t.FullName}");
                 }
             }
-            return token.ExtractValueInternal<T>();
+            return ExtractValueInternal<T>(ref token);
         }
 
         /// <summary>
@@ -89,7 +92,7 @@ namespace Ipatov.BinarySerialization
         /// <typeparam name="T">Expected value type.</typeparam>
         /// <param name="token">Serialization token.</param>
         /// <returns>Value.</returns>
-        private static T ExtractValueInternal<T>(this SerializationToken token)
+        private static T ExtractValueInternal<T>(ref SerializationToken token)
         {
             var extractor = SerializationToken.GetExtractor<T>();
             if (extractor != null)
@@ -145,7 +148,7 @@ namespace Ipatov.BinarySerialization
                     }
                 };
             }
-            var provider = context.GetTokensProvider<T>();
+            var provider = GetComplexTypeTokensProvider<T>(context, source.GetType());
             if (provider == null)
             {
                 throw new InvalidOperationException($"Serialization tokens provider not found for type {typeof(T).FullName}");
@@ -155,11 +158,50 @@ namespace Ipatov.BinarySerialization
                 TokenType = SerializationTokenType.Reference,
                 Reference = new SerializedComplexType()
                 {
-                    ObjectType = typeof(T),
+                    ObjectType = source.GetType(),
                     Properties = provider.GetProperties(source, context).ToArray(),
                     ReferenceIndex = context.AddReference(source)
                 }
             };
+        }
+
+        private static IExternalSerializationTokensProvider<T> GetComplexTypeTokensProvider<T>(SerializationContext context, Type sourceType)
+        {
+            if (sourceType == typeof(T))
+            {
+                return context.GetTokensProvider<T>();
+            }
+            var srcProvider = context.GetTokensProvider(sourceType);
+            return GetProviderForSubclass<T>(srcProvider, sourceType);
+        }
+
+        private static readonly Dictionary<KeyValuePair<Type, Type>, IExternalSerializationTokensProvider> SubclassWrappers = new Dictionary<KeyValuePair<Type, Type>, IExternalSerializationTokensProvider>();
+
+        private static IExternalSerializationTokensProvider<T> GetProviderForSubclass<T>(IExternalSerializationTokensProvider provider, Type subclassType)
+        {
+            if (provider == null) throw new ArgumentNullException(nameof(provider));
+            if (subclassType == null) throw new ArgumentNullException(nameof(subclassType));
+            var key = new KeyValuePair<Type, Type>(typeof(T), subclassType);
+            lock (SubclassWrappers)
+            {
+                if (!SubclassWrappers.ContainsKey(key))
+                {
+                    IExternalSerializationTokensProvider r = null;
+                    var parentType = typeof(T);
+                    if (subclassType.GetTypeInfo().IsSubclassOf(parentType))
+                    {
+                        var pt = typeof(SubclassExternalSerializationTokensProvider<,>).MakeGenericType(typeof(T), subclassType);
+                        var st = typeof(IExternalSerializationTokensProvider<>).MakeGenericType(subclassType);
+                        r = pt.GetTypeInfo().DeclaredConstructors.FirstOrDefault(c =>
+                        {
+                            var p = c.GetParameters();
+                            return p.Length == 1 && p[0].ParameterType == st && c.IsPublic;
+                        })?.Invoke(new object[] { provider }) as IExternalSerializationTokensProvider<T>;
+                    }
+                    SubclassWrappers[key] = r;
+                }
+                return SubclassWrappers[key] as IExternalSerializationTokensProvider<T>;
+            }
         }
 
         private static readonly Dictionary<Type, IExternalSerializationTokensProvider> Wrappers = new Dictionary<Type, IExternalSerializationTokensProvider>();
@@ -171,21 +213,77 @@ namespace Ipatov.BinarySerialization
         /// <returns>Wrapper or none if not found.</returns>
         public static IExternalSerializationTokensProvider GetDefaultTokensProvider(Type type)
         {
+            if (type == null) throw new ArgumentNullException(nameof(type));
             lock (Wrappers)
             {
                 if (!Wrappers.ContainsKey(type))
                 {
                     IExternalSerializationTokensProvider r = null;
                     var tinfo = type.GetTypeInfo();
-                    if (tinfo.ImplementedInterfaces.Any(t => t == typeof(ISerializationTokensProvider)) && tinfo.DeclaredConstructors.Any(c => c.IsPublic && c.GetParameters().Length == 0))
+                    var gtinfo = type.IsConstructedGenericType ? type.GetGenericTypeDefinition() : null;
+                    var haveParameterlessContstructor = tinfo.DeclaredConstructors.Any(c => c.IsPublic && c.GetParameters().Length == 0);
+
+                    if (type == typeof(Uri))
                     {
-                        var pt = typeof(SerializationTokensProviderWrapper<>).MakeGenericType(type);
-                        r = pt.GetTypeInfo().DeclaredConstructors.First(c => c.GetParameters().Length == 0).Invoke(null) as IExternalSerializationTokensProvider;
+                        r = new UriTokensProvider();
+                    }
+
+                    if (r == null)
+                    {
+                        if (type.IsArray)
+                        {
+                            var pt = typeof(ArrayTokensProvider<>).MakeGenericType(tinfo.GetElementType());
+                            r = CreateExternalSerializationTokensProvider(pt);
+                        }
+                    }
+
+                    if (r == null)
+                    {
+                        if (gtinfo == typeof(KeyValuePair<,>))
+                        {
+                            var pt = typeof(KeyValuePairTokensProvider<,>).MakeGenericType(tinfo.GenericTypeArguments[0], tinfo.GenericTypeArguments[1]);
+                            r = CreateExternalSerializationTokensProvider(pt);
+                        }
+                    }
+
+                    if (r == null)
+                    {
+                        if (gtinfo == typeof(Dictionary<,>) || gtinfo == typeof(SortedDictionary<,>))
+                        {
+                            var pt = typeof(DictionaryTokensProvider<,,>).MakeGenericType(tinfo.GenericTypeArguments[0], tinfo.GenericTypeArguments[1], type);
+                            r = CreateExternalSerializationTokensProvider(pt);
+                        }
+                    }
+
+                    if (r == null)
+                    {
+                        if (gtinfo == typeof(List<>) || gtinfo == typeof(HashSet<>) || gtinfo == typeof(SortedSet<>))
+                        {
+                            var pt = typeof(CollectionTokensProvider<,>).MakeGenericType(type, tinfo.GenericTypeArguments[0]);
+                            r = CreateExternalSerializationTokensProvider(pt);
+                        }
+                    }
+
+                    if (r == null)
+                    {
+                        // for wrapper
+                        if (tinfo.ImplementedInterfaces.Any(t => t == typeof(ISerializationTokensProvider)) && haveParameterlessContstructor)
+                        {
+                            var pt = typeof(SerializationTokensProviderWrapper<>).MakeGenericType(type);
+                            r = CreateExternalSerializationTokensProvider(pt);
+                        }
+
                     }
                     Wrappers[type] = r;
                 }
                 return Wrappers[type];
             }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static IExternalSerializationTokensProvider CreateExternalSerializationTokensProvider(Type pt)
+        {
+            return pt.GetTypeInfo().DeclaredConstructors.FirstOrDefault(c => c.GetParameters().Length == 0 && c.IsPublic)?.Invoke(null) as IExternalSerializationTokensProvider;
         }
     }
 }

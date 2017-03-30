@@ -11,11 +11,6 @@ namespace Ipatov.BinarySerialization.TokenProviders
     public sealed class KeyValuePairTokensProvider<TKey, TValue> : IExternalSerializationTokensProvider<KeyValuePair<TKey, TValue>>
     {
         /// <summary>
-        /// Instance.
-        /// </summary>
-        public static readonly KeyValuePairTokensProvider<TKey, TValue> Instance = new KeyValuePairTokensProvider<TKey, TValue>();
-
-        /// <summary>
         /// Get tokens for object properties.
         /// </summary>
         /// <param name="source">Source object.</param>
@@ -53,11 +48,13 @@ namespace Ipatov.BinarySerialization.TokenProviders
                 switch (p.Property)
                 {
                     case "Key":
-                        key = p.Token.ExtractValue<TKey>(context);
+                        var token = p.Token;
+                        key = context.ExtractValue<TKey>(ref token);
                         keyProvided = true;
                         break;
                     case "Value":
-                        value = p.Token.ExtractValue<TValue>(context);
+                        var token2 = p.Token;
+                        value = context.ExtractValue<TValue>(ref token2);
                         valueProvided = true;
                         break;
                 }

@@ -12,11 +12,6 @@ namespace Ipatov.BinarySerialization.TokenProviders
         where T : ICollection<TElement>, new()
     {
         /// <summary>
-        /// Instance.
-        /// </summary>
-        public static readonly CollectionTokensProvider<T, TElement> Instance = new CollectionTokensProvider<T, TElement>();
-
-        /// <summary>
         /// Get tokens for object properties.
         /// </summary>
         /// <param name="source">Source object.</param>
@@ -49,7 +44,8 @@ namespace Ipatov.BinarySerialization.TokenProviders
                 switch (property.Property)
                 {
                     case "Item":
-                        result.Add(property.Token.ExtractValue<TElement>(context));
+                        var p = property.Token;
+                        result.Add(context.ExtractValue<TElement>(ref p));
                         break;
                 }
             }

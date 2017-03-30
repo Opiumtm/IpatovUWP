@@ -1,15 +1,22 @@
 ﻿using System.Collections.Generic;
-using System.Runtime.InteropServices;
 
 namespace Ipatov.BinarySerialization.TokenProviders
 {
     /// <summary>
-    /// Wrapper for serialization tokens provider.
+    /// Wrapper for tokens provider of sublcasses.
     /// </summary>
-    /// <typeparam name="T">Objet type.</typeparam>
-    public sealed class SerializationTokensProviderWrapper<T> : IExternalSerializationTokensProvider<T>
-        where T: ISerializationTokensProvider, new()
+    /// <typeparam name="T">Parent type.</typeparam>
+    /// <typeparam name="TSub">Subclass type.</typeparam>
+    public sealed class SubclassExternalSerializationTokensProvider<T, TSub> : IExternalSerializationTokensProvider<T>
+        where TSub : T
     {
+        private readonly IExternalSerializationTokensProvider<TSub> _wrapped;
+
+        public SubclassExternalSerializationTokensProvider(IExternalSerializationTokensProvider<TSub> wrapped)
+        {
+            _wrapped = wrapped;
+        }
+
         /// <summary>
         /// Get tokens for object properties.
         /// </summary>
@@ -18,7 +25,7 @@ namespace Ipatov.BinarySerialization.TokenProviders
         /// <returns>Tokens.</returns>
         public IEnumerable<SerializationProperty> GetProperties(T source, SerializationContext context)
         {
-            return source.GetProperties(context);
+            return _wrapped.GetProperties((TSub) source, context);
         }
 
         /// <summary>
@@ -29,16 +36,7 @@ namespace Ipatov.BinarySerialization.TokenProviders
         /// <returns>Object.</returns>
         public T CreateObject<TEnum>(TEnum properties, SerializationContext context) where TEnum : IEnumerable<SerializationProperty>
         {
-            var result = new T();
-            using (var propEnum = properties.GetEnumerator())
-            {
-                while (propEnum.MoveNext())
-                {
-                    var p = propEnum.Current;
-                    result.FillProperty(ref p, context);
-                }
-            }
-            return result;
+            return _wrapped.CreateObject(properties, context);
         }
     }
 }

@@ -13,11 +13,6 @@ namespace Ipatov.BinarySerialization.TokenProviders
         where T : IDictionary<TKey, TValue>, new()
     {
         /// <summary>
-        /// Instance.
-        /// </summary>
-        public static readonly DictionaryTokensProvider<TKey, TValue, T> Instance = new DictionaryTokensProvider<TKey, TValue, T>();
-
-        /// <summary>
         /// Get tokens for object properties.
         /// </summary>
         /// <param name="source">Source object.</param>
@@ -27,7 +22,7 @@ namespace Ipatov.BinarySerialization.TokenProviders
         {
             foreach (var kv in source)
             {
-                foreach (var token in KeyValuePairTokensProvider<TKey, TValue>.Instance.GetProperties(kv, context))
+                foreach (var token in context.GetTokensProvider<KeyValuePair<TKey, TValue>>().GetProperties(kv, context))
                 {
                     yield return token;
                 }
@@ -43,10 +38,11 @@ namespace Ipatov.BinarySerialization.TokenProviders
         public T CreateObject<TEnum>(TEnum properties, SerializationContext context) where TEnum : IEnumerable<SerializationProperty>
         {
             if (properties == null) throw new ArgumentNullException(nameof(properties));
+            var provider = context.GetTokensProvider<KeyValuePair<TKey, TValue>>();
             var result = new T();
             foreach (var token in Split(properties))
             {
-                var kv = KeyValuePairTokensProvider<TKey, TValue>.Instance.CreateObject<Pair>(token, context);
+                var kv = provider.CreateObject(token, context);
                 result[kv.Key] = kv.Value;
             }
             return result;
