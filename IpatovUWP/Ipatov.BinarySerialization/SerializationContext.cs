@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 
 namespace Ipatov.BinarySerialization
 {
@@ -22,7 +23,7 @@ namespace Ipatov.BinarySerialization
             if (tokensProviders == null) throw new ArgumentNullException(nameof(tokensProviders));
             _objects = new Dictionary<int, object>();
             _index = new Dictionary<object, int>();
-            _tokensProviders = tokensProviders;
+            _tokensProviders = tokensProviders;            
         }
 
         /// <summary>
@@ -85,7 +86,17 @@ namespace Ipatov.BinarySerialization
         /// <returns>Tokens provider.</returns>
         public IExternalSerializationTokensProvider<T> GetTokensProvider<T>()
         {
-            return _tokensProviders.ContainsKey(typeof(T)) ? _tokensProviders[typeof(T)] as IExternalSerializationTokensProvider<T> : null;
+            return GetTokensProvider(typeof(T)) as IExternalSerializationTokensProvider<T>;
+        }
+
+        /// <summary>
+        /// Get serialization tokens provider.
+        /// </summary>
+        /// <param name="type">Object type.</param>
+        /// <returns>Tokens provider.</returns>
+        public IExternalSerializationTokensProvider GetTokensProvider(Type type)
+        {
+            return _tokensProviders.ContainsKey(type) ? _tokensProviders[type] : SerializationHelpers.GetDefaultTokensProvider(type);
         }
     }
 }

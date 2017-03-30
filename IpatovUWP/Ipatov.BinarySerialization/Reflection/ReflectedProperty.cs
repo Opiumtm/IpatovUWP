@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq.Expressions;
 using System.Reflection;
 
 namespace Ipatov.BinarySerialization.Reflection
@@ -11,30 +12,29 @@ namespace Ipatov.BinarySerialization.Reflection
         /// <summary>
         /// Property name.
         /// </summary>
-        public readonly string PropertyName;
+        public string PropertyName => _property.Name;
 
         /// <summary>
         /// Property type.
         /// </summary>
-        public readonly Type PropertyType;
+        public Type PropertyType => _property.PropertyType;
 
         /// <summary>
         /// Object type.
         /// </summary>
-        public readonly Type ObjectType;
+        public Type ObjectType => _property.DeclaringType;
 
         private readonly Delegate _getter;
         private readonly Delegate _setter;
+        private readonly PropertyInfo _property;
 
         public ReflectedProperty(PropertyInfo property)
         {
             if (property == null) throw new ArgumentNullException(nameof(property));
-            PropertyName = property.Name;
-            PropertyType = property.PropertyType;
-            ObjectType = property.DeclaringType;
-            var getterType = typeof(Func<,>).MakeGenericType(ObjectType, PropertyType);
+            _property = property;
+            var getterType = typeof(Func<,>).MakeGenericType(property.DeclaringType, property.PropertyType);
             _getter = property.GetMethod.CreateDelegate(getterType);
-            var setterType = typeof(Action<,>).MakeGenericType(ObjectType, PropertyType); ;
+            var setterType = typeof(Action<,>).MakeGenericType(property.DeclaringType, property.PropertyType); ;
             _setter = property.SetMethod.CreateDelegate(setterType);
         }
 

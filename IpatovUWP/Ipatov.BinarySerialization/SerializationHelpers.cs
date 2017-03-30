@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Ipatov.BinarySerialization.TokenProviders;
 
 namespace Ipatov.BinarySerialization
 {
@@ -158,6 +160,32 @@ namespace Ipatov.BinarySerialization
                     ReferenceIndex = context.AddReference(source)
                 }
             };
+        }
+
+        private static readonly Dictionary<Type, IExternalSerializationTokensProvider> Wrappers = new Dictionary<Type, IExternalSerializationTokensProvider>();
+
+        /// <summary>
+        /// Get tokens provider wrapper for type that implements <see cref="ISerializationTokensProvider"/>.
+        /// </summary>
+        /// <param name="type">Type.</param>
+        /// <returns>Wrapper or none if not found.</returns>
+        public static IExternalSerializationTokensProvider GetDefaultTokensProvider(Type type)
+        {
+            lock (Wrappers)
+            {
+                if (!Wrappers.ContainsKey(type))
+                {
+                    IExternalSerializationTokensProvider r = null;
+                    var tinfo = type.GetTypeInfo();
+                    if (tinfo.ImplementedInterfaces.Any(t => t == typeof(ISerializationTokensProvider)) && tinfo.DeclaredConstructors.Any(c => c.IsPublic && c.GetParameters().Length == 0))
+                    {
+                        var pt = typeof(SerializationTokensProviderWrapper<>).MakeGenericType(type);
+                        r = pt.GetTypeInfo().DeclaredConstructors.First(c => c.GetParameters().Length == 0).Invoke(null) as IExternalSerializationTokensProvider;
+                    }
+                    Wrappers[type] = r;
+                }
+                return Wrappers[type];
+            }
         }
     }
 }

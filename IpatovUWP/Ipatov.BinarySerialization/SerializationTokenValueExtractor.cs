@@ -3,10 +3,30 @@ using System;
 namespace Ipatov.BinarySerialization
 {
     /// <summary>
+    /// Средство получения значения из токена без типизации.
+    /// </summary>
+    public abstract class SerializationTokenValueExtractor
+    {
+        /// <summary>
+        /// Получить значение.
+        /// </summary>
+        /// <param name="token">Токен.</param>
+        /// <returns>Значение.</returns>
+        public abstract object GetValueNonGeneric(SerializationToken token);
+
+        /// <summary>
+        /// Создать токен.
+        /// </summary>
+        /// <param name="value">Значение.</param>
+        /// <returns>Токен.</returns>
+        public abstract SerializationToken CreateTokenNonGeneric(object value);
+    }
+
+    /// <summary>
     /// Средство получения значения из токена.
     /// </summary>
     /// <typeparam name="T">Тип значения.</typeparam>
-    public abstract class SerializationTokenValueExtractor<T>
+    public abstract class SerializationTokenValueExtractor<T> : SerializationTokenValueExtractor
     {
         /// <summary>
         /// Получить значение.
@@ -21,6 +41,26 @@ namespace Ipatov.BinarySerialization
         /// <param name="value">Значение.</param>
         /// <returns>Токен.</returns>
         public abstract SerializationToken CreateToken(T value);
+
+        /// <summary>
+        /// Получить значение.
+        /// </summary>
+        /// <param name="token">Токен.</param>
+        /// <returns>Значение.</returns>
+        public sealed override object GetValueNonGeneric(SerializationToken token)
+        {
+            return GetValue(token);
+        }
+
+        /// <summary>
+        /// Создать токен.
+        /// </summary>
+        /// <param name="value">Значение.</param>
+        /// <returns>Токен.</returns>
+        public sealed override SerializationToken CreateTokenNonGeneric(object value)
+        {
+            return CreateToken((T)value);
+        }
     }
 
     /// <summary>

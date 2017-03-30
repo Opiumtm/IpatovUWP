@@ -286,5 +286,19 @@ namespace Ipatov.BinarySerialization
             }
             return null;
         }
+
+        /// <summary>
+        /// Get token value extractor.
+        /// </summary>
+        /// <param name="type">Value type.</param>
+        /// <returns>Value extractor (null if non-standard complex type).</returns>
+        public static SerializationTokenValueExtractor GetExtractor(Type type)
+        {
+            if (ValueExtractors.ContainsKey(type))
+            {
+                return ValueExtractors[type] as SerializationTokenValueExtractor;
+            }
+            return null;
+        }
     }
 }
