@@ -35,7 +35,7 @@ namespace Ipatov.BinarySerialization
         /// <returns>Cloned object.</returns>
         public static T DeepClone<T>(this T source)
         {
-            var context = source != null ? GetKnownTokenProviders(source.GetType()).GetKnownTokenProviders().CreateContext() : new SerializationContext(new Dictionary<Type, IExternalSerializationTokensProvider>());
+            var context = new SerializationContext(new Dictionary<Type, IExternalSerializationTokensProvider>());
             var serialized = source.CreateSerializationToken(context);
             return context.ExtractValue<T>(ref serialized);
         }
