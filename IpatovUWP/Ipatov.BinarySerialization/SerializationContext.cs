@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace Ipatov.BinarySerialization
 {
@@ -13,6 +14,7 @@ namespace Ipatov.BinarySerialization
         private readonly Dictionary<int, object> _objects;
         private readonly Dictionary<object, int> _index;
         private readonly IReadOnlyDictionary<Type, IExternalSerializationTokensProvider> _tokensProviders;
+        private readonly Stack<Type> _typeStack = new Stack<Type>();
 
         /// <summary>
         /// Constructor.
@@ -96,7 +98,36 @@ namespace Ipatov.BinarySerialization
         /// <returns>Tokens provider.</returns>
         public IExternalSerializationTokensProvider GetTokensProvider(Type type)
         {
-            return _tokensProviders.ContainsKey(type) ? _tokensProviders[type] : SerializationHelpers.GetDefaultTokensProvider(type);
+            if (_tokensProviders.ContainsKey(type))
+            {
+                return _tokensProviders[type];
+            }
+            var known = this.GetKnownTokenProviders();
+            var p = known?.GetKnownTokenProviders().GetProvider(type);
+            if (p != null)
+            {
+                return p;
+            }
+            return SerializationHelpers.GetDefaultTokensProvider(type);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal void SerializingComplexType(Type t)
+        {
+            if (t == null) throw new ArgumentNullException(nameof(t));
+            _typeStack.Push(t);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal void FinishedSerializingComplexType()
+        {
+            _typeStack.Pop();
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal Type[] GetTypeStack()
+        {
+            return _typeStack.ToArray();
         }
     }
 }

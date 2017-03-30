@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using Ipatov.BinarySerialization.Reflection;
+using Ipatov.BinarySerialization.TokenProviders;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Ipatov.BinarySerialization.UwpTests
@@ -54,6 +56,34 @@ namespace Ipatov.BinarySerialization.UwpTests
             Assert.AreEqual(so1.TestIntValue, so2.TestIntValue);
             Assert.AreEqual(so1.TestPair, so2.TestPair);
         }
+
+        [TestMethod]
+        public void ComplexDeepClone()
+        {
+            var d = new Dictionary<Type, IExternalSerializationTokensProvider>();
+            var context = new SerializationContext(new ReadOnlyDictionary<Type, IExternalSerializationTokensProvider>(d));
+            var o = new ComplexWrappedClass() { Wrapped = new WrappersSubclassTestClass()
+            {
+                TestProperty = "Test string",
+                TestIntValue = 1024,
+                TestPair = new KeyValuePair<int, int>(10, 20)
+            }};
+            var o2 = o.DeepClone(context);
+            Assert.IsNotNull(o2);
+            Assert.IsNotNull(o2.Wrapped);
+            Assert.AreNotSame(o, o2);
+            Assert.AreNotSame(o.Wrapped, o2.Wrapped);
+            var w = o.Wrapped as WrappersSubclassTestClass;
+            var w2 = o2.Wrapped as WrappersSubclassTestClass;
+            Assert.IsNotNull(w);
+            Assert.IsNotNull(w2);
+            Assert.AreEqual(w.TestProperty, w2.TestProperty);
+            Assert.AreEqual(w.TestIntValue, w2.TestIntValue);
+            Assert.AreEqual(w.TestPair, w2.TestPair);
+            Assert.IsTrue(ComplexDeepClone_isRetrv, "Not called known providers");
+        }
+
+        public static bool ComplexDeepClone_isRetrv = false;
     }
 
     public class WrappersTestClassBase
@@ -122,6 +152,7 @@ namespace Ipatov.BinarySerialization.UwpTests
         }
     }
 
+    [KnownTokenProviders(typeof(WrappedClassKnownProviders))]
     public class ComplexWrappedClass : ISerializationTokensProvider
     {
         public WrappersTestClass Wrapped { get; set; }
@@ -143,6 +174,20 @@ namespace Ipatov.BinarySerialization.UwpTests
                     Wrapped = context.ExtractValue<WrappersTestClass>(ref property.Token);
                     break;
             }
+        }
+    }
+
+    public class WrappedClassKnownProviders : IKnownTokenProviders
+    {
+        public KnownTokenProviders GetKnownTokenProviders()
+        {
+            TestWrappers.ComplexDeepClone_isRetrv = true;
+            return new KnownTokenProviders(new Dictionary<Type, IExternalSerializationTokensProvider>()
+            {
+                { typeof(WrappersTestClass), new SerializationTokensProviderWrapper<WrappersTestClass>()},
+                { typeof(WrappersSubclassTestClass), new SerializationTokensProviderWrapper<WrappersSubclassTestClass>()},
+                { typeof(KeyValuePair<int, int>), new KeyValuePairTokensProvider<int, int>() }
+            });
         }
     }
 }

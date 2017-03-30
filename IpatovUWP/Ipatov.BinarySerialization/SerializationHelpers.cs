@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using Ipatov.BinarySerialization.Reflection;
 using Ipatov.BinarySerialization.TokenProviders;
 
 namespace Ipatov.BinarySerialization
@@ -22,6 +23,19 @@ namespace Ipatov.BinarySerialization
         /// <returns>Cloned object.</returns>
         public static T DeepClone<T>(this T source, SerializationContext context)
         {
+            var serialized = source.CreateSerializationToken(context);
+            return context.ExtractValue<T>(ref serialized);
+        }
+
+        /// <summary>
+        /// Deep clone object.
+        /// </summary>
+        /// <typeparam name="T">Object type.</typeparam>
+        /// <param name="source">Source object.</param>
+        /// <returns>Cloned object.</returns>
+        public static T DeepClone<T>(this T source)
+        {
+            var context = source != null ? GetKnownTokenProviders(source.GetType()).GetKnownTokenProviders().CreateContext() : new SerializationContext(new Dictionary<Type, IExternalSerializationTokensProvider>());
             var serialized = source.CreateSerializationToken(context);
             return context.ExtractValue<T>(ref serialized);
         }
@@ -62,25 +76,22 @@ namespace Ipatov.BinarySerialization
                 if (token.Reference is SerializedComplexType)
                 {
                     var c = (SerializedComplexType)token.Reference;
-                    var provider = GetComplexTypeTokensProvider<T>(context, c.ObjectType);
-                    if (provider == null)
+                    context.SerializingComplexType(c.ObjectType);
+                    try
                     {
-                        throw new InvalidOperationException($"Serialization tokens provider not found for type {typeof(T).FullName}");
-                    }
-                    var t = typeof(T);
-                    if (t == c.ObjectType)
-                    {
+                        var provider = GetComplexTypeTokensProvider<T>(context, c.ObjectType);
+                        if (provider == null)
+                        {
+                            throw new InvalidOperationException($"Serialization tokens provider not found for type {typeof(T).FullName}");
+                        }
                         var o = provider.CreateObject(c.Properties, context);
                         context.AddReference(c.ReferenceIndex, o);
                         return o;
                     }
-                    if (c.ObjectType.GetTypeInfo().IsSubclassOf(t))
+                    finally
                     {
-                        var o = provider.CreateObject(c.Properties, context);
-                        context.AddReference(c.ReferenceIndex, o);
-                        return o;
+                        context.FinishedSerializingComplexType();
                     }
-                    throw new InvalidOperationException($"Deserialization error. Object of type {c.ObjectType.FullName} is not subclass of expected type {t.FullName}");
                 }
             }
             return ExtractValueInternal<T>(ref token);
@@ -136,33 +147,41 @@ namespace Ipatov.BinarySerialization
                     TokenType = SerializationTokenType.Nothing
                 };
             }
-            var idx = context.IsReferenced(source);
-            if (idx != null)
+            context.SerializingComplexType(source.GetType());
+            try
             {
+                var idx = context.IsReferenced(source);
+                if (idx != null)
+                {
+                    return new SerializationToken()
+                    {
+                        TokenType = SerializationTokenType.Reference,
+                        Reference = new SerializedComplexTypeReference()
+                        {
+                            ReferenceIndex = idx.Value
+                        }
+                    };
+                }
+                var provider = GetComplexTypeTokensProvider<T>(context, source.GetType());
+                if (provider == null)
+                {
+                    throw new InvalidOperationException($"Serialization tokens provider not found for type {typeof(T).FullName}");
+                }
                 return new SerializationToken()
                 {
                     TokenType = SerializationTokenType.Reference,
-                    Reference = new SerializedComplexTypeReference()
+                    Reference = new SerializedComplexType()
                     {
-                        ReferenceIndex = idx.Value
+                        ObjectType = source.GetType(),
+                        Properties = provider.GetProperties(source, context).ToArray(),
+                        ReferenceIndex = context.AddReference(source)
                     }
                 };
             }
-            var provider = GetComplexTypeTokensProvider<T>(context, source.GetType());
-            if (provider == null)
+            finally
             {
-                throw new InvalidOperationException($"Serialization tokens provider not found for type {typeof(T).FullName}");
+                context.FinishedSerializingComplexType();
             }
-            return new SerializationToken()
-            {
-                TokenType = SerializationTokenType.Reference,
-                Reference = new SerializedComplexType()
-                {
-                    ObjectType = source.GetType(),
-                    Properties = provider.GetProperties(source, context).ToArray(),
-                    ReferenceIndex = context.AddReference(source)
-                }
-            };
         }
 
         private static IExternalSerializationTokensProvider<T> GetComplexTypeTokensProvider<T>(SerializationContext context, Type sourceType)
@@ -284,6 +303,39 @@ namespace Ipatov.BinarySerialization
         private static IExternalSerializationTokensProvider CreateExternalSerializationTokensProvider(Type pt)
         {
             return pt.GetTypeInfo().DeclaredConstructors.FirstOrDefault(c => c.GetParameters().Length == 0 && c.IsPublic)?.Invoke(null) as IExternalSerializationTokensProvider;
+        }
+
+        private static readonly Dictionary<Type, IKnownTokenProviders> KnownTokenProviders = new Dictionary<Type, IKnownTokenProviders>();
+
+        /// <summary>
+        /// Get known token providers for type.
+        /// </summary>
+        /// <param name="context">Serialization context.</param>
+        /// <returns>Known token providers.</returns>
+        public static IKnownTokenProviders GetKnownTokenProviders(this SerializationContext context)
+        {
+            if (context == null) throw new ArgumentNullException(nameof(context));
+            var stack = context.GetTypeStack().Select(GetKnownTokenProviders).ToArray();
+            return new CombinedTokenProvidersInfo(stack);
+        }
+
+        /// <summary>
+        /// Get known token providers for type.
+        /// </summary>
+        /// <param name="type">Type.</param>
+        /// <returns>Known token providers.</returns>
+        public static IKnownTokenProviders GetKnownTokenProviders(Type type)
+        {
+            if (type == null) throw new ArgumentNullException(nameof(type));
+            lock (KnownTokenProviders)
+            {
+                if (!KnownTokenProviders.ContainsKey(type))
+                {
+                    var attrs = type.GetTypeInfo().GetCustomAttributes<KnownTokenProvidersAttribute>().Select(a => a.GetProviders()).ToArray();
+                    KnownTokenProviders[type] = new CombinedTokenProvidersInfo(attrs);
+                }
+                return KnownTokenProviders[type];
+            }
         }
     }
 }
