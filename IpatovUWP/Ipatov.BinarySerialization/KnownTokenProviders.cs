@@ -9,13 +9,13 @@ namespace Ipatov.BinarySerialization
     /// </summary>
     public struct KnownTokenProviders
     {
-        private readonly Dictionary<Type, IExternalSerializationTokensProvider> _providers;
+        private readonly IReadOnlyDictionary<Type, IExternalSerializationTokensProvider> _providers;
 
         /// <summary>
         /// Constructor.
         /// </summary>
         /// <param name="providers">Providers.</param>
-        public KnownTokenProviders(Dictionary<Type, IExternalSerializationTokensProvider> providers)
+        public KnownTokenProviders(IReadOnlyDictionary<Type, IExternalSerializationTokensProvider> providers)
         {
             _providers = providers;
         }
@@ -43,29 +43,13 @@ namespace Ipatov.BinarySerialization
             return _providers.ContainsKey(type) ? _providers[type] : null;
         }
 
-        public static KnownTokenProviders operator +(KnownTokenProviders a, KnownTokenProviders b)
+        /// <summary>
+        /// Get token providers.
+        /// </summary>
+        /// <returns>Token providers.</returns>
+        public IReadOnlyDictionary<Type, IExternalSerializationTokensProvider> GetProviders()
         {
-            var d = new Dictionary<Type, IExternalSerializationTokensProvider>();
-            if (a._providers != null)
-            {
-                foreach (var kv in a._providers)
-                {
-                    d[kv.Key] = kv.Value;
-                }
-            }
-            if (b._providers != null)
-            {
-                foreach (var kv in b._providers)
-                {
-                    d[kv.Key] = kv.Value;
-                }
-            }
-            return new KnownTokenProviders(d);
-        }
-
-        public static implicit operator KnownTokenProviders(Dictionary<Type, IExternalSerializationTokensProvider> src)
-        {
-            return new KnownTokenProviders(src);
+            return _providers;
         }
     }
 }

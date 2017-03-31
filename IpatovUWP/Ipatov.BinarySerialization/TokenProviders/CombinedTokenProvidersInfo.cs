@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using Ipatov.BinarySerialization.Internals;
 
 namespace Ipatov.BinarySerialization.TokenProviders
 {
@@ -16,15 +18,15 @@ namespace Ipatov.BinarySerialization.TokenProviders
         public CombinedTokenProvidersInfo(params IKnownTokenProviders[] providers)
         {
             if (providers == null) throw new ArgumentNullException(nameof(providers));
-            var r = new KnownTokenProviders();
+            var dicts = new List<IReadOnlyDictionary<Type, IExternalSerializationTokensProvider>>();
             foreach (var provider in providers)
             {
                 if (provider != null)
                 {
-                    r = r + provider.GetKnownTokenProviders();
+                    dicts.Add(provider.GetKnownTokenProviders().GetProviders());
                 }
             }
-            _providers = r;
+            _providers = new KnownTokenProviders(new CompoundDictionary<Type, IExternalSerializationTokensProvider>(dicts.ToArray()));
         }
 
         /// <summary>
