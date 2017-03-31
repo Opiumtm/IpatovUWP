@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Ipatov.BinarySerialization
 {
@@ -20,6 +21,6 @@ namespace Ipatov.BinarySerialization
         /// <summary>
         /// Properties.
         /// </summary>
-        public SerializationProperty[] Properties;
+        public IEnumerable<SerializationProperty> Properties;
     }
 }

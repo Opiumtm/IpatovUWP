@@ -173,7 +173,7 @@ namespace Ipatov.BinarySerialization
                     Reference = new SerializedComplexType()
                     {
                         ObjectType = source.GetType(),
-                        Properties = provider.GetProperties(source, context).ToArray(),
+                        Properties = provider.GetProperties(source, context),
                         ReferenceIndex = context.AddReference(source)
                     }
                 };
