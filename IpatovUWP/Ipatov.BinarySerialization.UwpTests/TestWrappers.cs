@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
+using System.Text;
 using Ipatov.BinarySerialization.Reflection;
 using Ipatov.BinarySerialization.TokenProviders;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.VisualStudio.TestTools.UnitTesting.Logging;
 
 namespace Ipatov.BinarySerialization.UwpTests
 {
@@ -81,6 +84,33 @@ namespace Ipatov.BinarySerialization.UwpTests
             Assert.AreEqual(w.TestIntValue, w2.TestIntValue);
             Assert.AreEqual(w.TestPair, w2.TestPair);
             Assert.IsTrue(ComplexDeepClone_isRetrv, "Not called known providers");
+        }
+
+        [TestMethod]
+        public void ComplexBinaryWrite()
+        {
+            var d = new Dictionary<Type, IExternalSerializationTokensProvider>();
+            var context = new SerializationContext(new ReadOnlyDictionary<Type, IExternalSerializationTokensProvider>(d));
+            var o = new ComplexWrappedClass()
+            {
+                Wrapped = new WrappersSubclassTestClass()
+                {
+                    TestProperty = "Test string",
+                    TestIntValue = 1024,
+                    TestPair = new KeyValuePair<int, int>(10, 20)
+                }
+            };
+            byte[] serialized;
+            using (var str = new MemoryStream())
+            {
+                using (var wr = new StreamWriter(str, Encoding.UTF8))
+                {
+                    wr.Serialize(o, context);
+                }
+                serialized = str.ToArray();
+            }
+            Assert.IsTrue(serialized.Length > 0);
+            Logger.LogMessage($"Serialized data length = {serialized.Length} bytes");
         }
 
         public static bool ComplexDeepClone_isRetrv = false;

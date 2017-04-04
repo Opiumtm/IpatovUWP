@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using Ipatov.BinarySerialization.IO;
 
 namespace Ipatov.BinarySerialization
 {
@@ -32,6 +34,42 @@ namespace Ipatov.BinarySerialization
             var context = new SerializationContext(new Dictionary<Type, IExternalSerializationTokensProvider>());
             var serialized = source.CreateSerializationToken(context);
             return context.ExtractValue<T>(ref serialized);
+        }
+
+        /// <summary>
+        /// Serialize object.
+        /// </summary>
+        /// <typeparam name="T">Object type.</typeparam>
+        /// <param name="writer">Stream writer.</param>
+        /// <param name="source">Source object.</param>
+        /// <param name="context">External serialization tokens provider.</param>
+        public static void Serialize<T>(this StreamWriter writer, T source, SerializationContext context)
+        {
+            if (writer == null) throw new ArgumentNullException(nameof(writer));
+            var serialized = source.CreateSerializationToken(context);
+            var bwr = new StreamTokenWriter(writer);
+            try
+            {
+                bwr.WritePreamble();
+                bwr.WriteToken(context, ref serialized);
+            }
+            finally
+            {
+                bwr.Flush();
+            }
+        }
+
+        /// <summary>
+        /// Serialize object.
+        /// </summary>
+        /// <typeparam name="T">Object type.</typeparam>
+        /// <param name="writer">Stream writer.</param>
+        /// <param name="source">Source object.</param>
+        public static void Serialize<T>(this StreamWriter writer, T source)
+        {
+            if (writer == null) throw new ArgumentNullException(nameof(writer));
+            var context = new SerializationContext(new Dictionary<Type, IExternalSerializationTokensProvider>());
+            writer.Serialize(source, context);
         }
 
         /// <summary>

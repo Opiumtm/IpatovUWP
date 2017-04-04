@@ -16,6 +16,8 @@ namespace Ipatov.BinarySerialization
     {
         private readonly Dictionary<int, object> _objects;
         private readonly Dictionary<object, int> _index;
+        private readonly Dictionary<int, string> _strings;
+        private readonly Dictionary<string, int> _stringIndex;
         private readonly IReadOnlyDictionary<Type, IExternalSerializationTokensProvider> _tokensProviders;
         private readonly Stack<Type> _typeStack = new Stack<Type>();
 
@@ -30,6 +32,8 @@ namespace Ipatov.BinarySerialization
             _index = new Dictionary<object, int>();
             _tokensProviders = tokensProviders;            
             _subclasses = new LazyDictionary<SubsclassDesc, IExternalSerializationTokensProvider>(GetSubclassWrapper);
+            _strings = new Dictionary<int, string>();
+            _stringIndex = new Dictionary<string, int>(StringComparer.Ordinal);
         }
 
         /// <summary>
@@ -54,6 +58,25 @@ namespace Ipatov.BinarySerialization
         /// <summary>
         /// Add reference.
         /// </summary>
+        /// <param name="obj">Object.</param>
+        /// <returns>Object index.</returns>
+        public int AddString(string obj)
+        {
+            if (obj == null) throw new ArgumentNullException(nameof(obj));
+            if (_stringIndex.ContainsKey(obj))
+            {
+                return _stringIndex[obj];
+            }
+            var m = _strings.Keys.DefaultIfEmpty(-1).Max();
+            var idx = m + 1;
+            _strings[idx] = obj;
+            _stringIndex[obj] = idx;
+            return idx;
+        }
+
+        /// <summary>
+        /// Add reference.
+        /// </summary>
         /// <param name="idx">Index.</param>
         /// <param name="obj">Object.</param>
         /// <returns>Object index.</returns>
@@ -62,6 +85,19 @@ namespace Ipatov.BinarySerialization
             if (obj == null) throw new ArgumentNullException(nameof(obj));
             _objects[idx] = obj;
             _index[obj] = idx;
+        }
+
+        /// <summary>
+        /// Add reference.
+        /// </summary>
+        /// <param name="idx">Index.</param>
+        /// <param name="obj">Object.</param>
+        /// <returns>Object index.</returns>
+        public void AddString(int idx, string obj)
+        {
+            if (obj == null) throw new ArgumentNullException(nameof(obj));
+            _strings[idx] = obj;
+            _stringIndex[obj] = idx;
         }
 
         /// <summary>
@@ -75,6 +111,16 @@ namespace Ipatov.BinarySerialization
         }
 
         /// <summary>
+        /// Get object reference.
+        /// </summary>
+        /// <param name="index">Object index.</param>
+        /// <returns>Object</returns>
+        public string GetString(int index)
+        {
+            return _strings.ContainsKey(index) ? _strings[index] : null;
+        }
+
+        /// <summary>
         /// Test if reference already exists.
         /// </summary>
         /// <param name="obj">Object.</param>
@@ -83,6 +129,17 @@ namespace Ipatov.BinarySerialization
         {
             if (obj == null) throw new ArgumentNullException(nameof(obj));
             return _index.ContainsKey(obj) ? (int?)_index[obj] : null;
+        }
+
+        /// <summary>
+        /// Test if reference already exists.
+        /// </summary>
+        /// <param name="obj">Object.</param>
+        /// <returns>Index or null if not exists.</returns>
+        public int? IsStringReferenced(string obj)
+        {
+            if (obj == null) throw new ArgumentNullException(nameof(obj));
+            return _stringIndex.ContainsKey(obj) ? (int?)_stringIndex[obj] : null;
         }
 
         /// <summary>
