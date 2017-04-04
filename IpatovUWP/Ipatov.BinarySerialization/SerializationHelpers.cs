@@ -43,7 +43,7 @@ namespace Ipatov.BinarySerialization
         /// <param name="writer">Stream writer.</param>
         /// <param name="source">Source object.</param>
         /// <param name="context">External serialization tokens provider.</param>
-        public static void Serialize<T>(this StreamWriter writer, T source, SerializationContext context)
+        public static void Serialize<T>(this BinaryWriter writer, T source, SerializationContext context)
         {
             if (writer == null) throw new ArgumentNullException(nameof(writer));
             var serialized = source.CreateSerializationToken(context);
@@ -65,10 +65,15 @@ namespace Ipatov.BinarySerialization
         /// <typeparam name="T">Object type.</typeparam>
         /// <param name="writer">Stream writer.</param>
         /// <param name="source">Source object.</param>
-        public static void Serialize<T>(this StreamWriter writer, T source)
+        /// <param name="typeMapper">Type mapper.</param>
+        public static void Serialize<T>(this BinaryWriter writer, T source, ITypeMapper typeMapper = null)
         {
             if (writer == null) throw new ArgumentNullException(nameof(writer));
             var context = new SerializationContext(new Dictionary<Type, IExternalSerializationTokensProvider>());
+            if (typeMapper != null)
+            {
+                context.TypeMapper = typeMapper;
+            }
             writer.Serialize(source, context);
         }
 

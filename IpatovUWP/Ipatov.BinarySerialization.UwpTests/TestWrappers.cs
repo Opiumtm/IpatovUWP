@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
+using Windows.Storage;
 using Ipatov.BinarySerialization.Reflection;
 using Ipatov.BinarySerialization.TokenProviders;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -87,7 +89,7 @@ namespace Ipatov.BinarySerialization.UwpTests
         }
 
         [TestMethod]
-        public void ComplexBinaryWrite()
+        public async Task ComplexBinaryWrite()
         {
             var d = new Dictionary<Type, IExternalSerializationTokensProvider>();
             var context = new SerializationContext(new ReadOnlyDictionary<Type, IExternalSerializationTokensProvider>(d));
@@ -103,7 +105,7 @@ namespace Ipatov.BinarySerialization.UwpTests
             byte[] serialized;
             using (var str = new MemoryStream())
             {
-                using (var wr = new StreamWriter(str, Encoding.UTF8))
+                using (var wr = new BinaryWriter(str, Encoding.UTF8))
                 {
                     wr.Serialize(o, context);
                 }
@@ -111,6 +113,11 @@ namespace Ipatov.BinarySerialization.UwpTests
             }
             Assert.IsTrue(serialized.Length > 0);
             Logger.LogMessage($"Serialized data length = {serialized.Length} bytes");
+            var myDocs = KnownFolders.DocumentsLibrary;
+            using (var str = await (await myDocs.CreateFileAsync("ComplexBinaryWrite.ibsf", CreationCollisionOption.ReplaceExisting)).OpenStreamForWriteAsync())
+            {
+                await str.WriteAsync(serialized, 0, serialized.Length);
+            }
         }
 
         public static bool ComplexDeepClone_isRetrv = false;

@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using Ipatov.BinarySerialization.Internals;
 using Ipatov.BinarySerialization.Reflection;
 using Ipatov.BinarySerialization.TokenProviders;
+using Ipatov.BinarySerialization.TypeMapping;
 
 namespace Ipatov.BinarySerialization
 {
@@ -20,6 +21,7 @@ namespace Ipatov.BinarySerialization
         private readonly Dictionary<string, int> _stringIndex;
         private readonly IReadOnlyDictionary<Type, IExternalSerializationTokensProvider> _tokensProviders;
         private readonly Stack<Type> _typeStack = new Stack<Type>();
+        private ITypeMapper _typeMapper = DefaultTypeMapper.Instance;
 
         /// <summary>
         /// Constructor.
@@ -336,6 +338,14 @@ namespace Ipatov.BinarySerialization
             }
         }
 
+        /// <summary>
+        /// Type mapper.
+        /// </summary>
+        public ITypeMapper TypeMapper
+        {
+            get { return _typeMapper; }
+            set { _typeMapper = value ?? DefaultTypeMapper.Instance; }
+        }
 
         private struct SubsclassDesc : IEquatable<SubsclassDesc>
         {

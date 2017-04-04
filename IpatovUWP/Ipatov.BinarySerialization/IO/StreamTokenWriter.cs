@@ -9,13 +9,13 @@ namespace Ipatov.BinarySerialization.IO
     /// </summary>
     public sealed class StreamTokenWriter : ISerializationWriter
     {
-        private readonly StreamWriter _writer;
+        private readonly BinaryWriter _writer;
 
         /// <summary>
         /// Constructor.
         /// </summary>
         /// <param name="writer">Binary writer.</param>
-        public StreamTokenWriter(StreamWriter writer)
+        public StreamTokenWriter(BinaryWriter writer)
         {
             if (writer == null) throw new ArgumentNullException(nameof(writer));
             _writer = writer;
@@ -125,7 +125,23 @@ namespace Ipatov.BinarySerialization.IO
                     break;
                 case SerializedComplexType ct:
                     _writer.Write((byte)ComplexTypeReferenceKind.ComplexType);
-                    WriteString(context, ct.ObjectType.AssemblyQualifiedName);
+                    if (ct.ObjectType == null)
+                    {
+                        throw new InvalidOperationException("Serialization error. Complex token object type not specified.");
+                    }
+                    var typeName = context.TypeMapper.GetTypeName(ct.ObjectType, context);
+                    if (typeName == null)
+                    {
+                        throw new InvalidOperationException($"Serialization error. Cannot map type {ct.ObjectType.FullName}");
+                    }
+                    WriteString(context, typeName.Value.Kind ?? "");
+                    WriteString(context, typeName.Value.Type ?? "");
+                    var a = typeName.Value.TypeParameters ?? new string[0];
+                    WriteIndex(a.Length);
+                    for (var i = 0; i < a.Length; i++)
+                    {
+                        WriteString(context, a[i] ?? "");
+                    }
                     using (var propEnum = ct.Properties.GetEnumerator())
                     {
                         while (propEnum.MoveNext())
@@ -211,7 +227,6 @@ namespace Ipatov.BinarySerialization.IO
             _writer.Write(SerializationFormatConsts.Header[2]);
             _writer.Write(SerializationFormatConsts.Header[3]);
             _writer.Write(SerializationFormatConsts.Version);
-            _writer.Write(_writer.Encoding.CodePage);
         }
     }
 }
