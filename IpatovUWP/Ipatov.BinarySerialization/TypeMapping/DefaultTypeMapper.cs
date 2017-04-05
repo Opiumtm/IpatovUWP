@@ -9,11 +9,6 @@ namespace Ipatov.BinarySerialization.TypeMapping
     /// </summary>
     public sealed class DefaultTypeMapper : ITypeMapper
     {
-        /// <summary>
-        /// Instance.
-        /// </summary>
-        public static readonly ITypeMapper Instance = new DefaultTypeMapper();
-
         private static readonly LazyDictionary<string, Type> DefaultMapper = new LazyDictionary<string, Type>(MapDefault);
 
         private static Type MapDefault(string typeName)

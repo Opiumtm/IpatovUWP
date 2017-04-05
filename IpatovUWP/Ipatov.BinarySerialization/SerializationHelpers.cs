@@ -46,6 +46,7 @@ namespace Ipatov.BinarySerialization
         public static void Serialize<T>(this BinaryWriter writer, T source, SerializationContext context)
         {
             if (writer == null) throw new ArgumentNullException(nameof(writer));
+            if (context == null) throw new ArgumentNullException(nameof(context));
             var serialized = source.CreateSerializationToken(context);
             var bwr = new StreamTokenWriter(writer);
             try
@@ -75,6 +76,40 @@ namespace Ipatov.BinarySerialization
                 context.TypeMapper = typeMapper;
             }
             writer.Serialize(source, context);
+        }
+
+        /// <summary>
+        /// Deserialize object.
+        /// </summary>
+        /// <typeparam name="T">Object type.</typeparam>
+        /// <param name="reader">Stream reader.</param>
+        /// <param name="context">External serialization tokens provider.</param>
+        /// <returns>Deserialized object.</returns>
+        public static T Deserialize<T>(this BinaryReader reader, SerializationContext context)
+        {
+            if (reader == null) throw new ArgumentNullException(nameof(reader));
+            if (context == null) throw new ArgumentNullException(nameof(context));
+            var brd = new StreamTokenReader(reader);
+            brd.ValidatePreamble();
+            var token = brd.ReadToken(context);
+            return context.ExtractValue<T>(ref token);
+        }
+
+        /// <summary>
+        /// Deserialize object.
+        /// </summary>
+        /// <typeparam name="T">Object type.</typeparam>
+        /// <param name="reader">Stream reader.</param>
+        /// <param name="typeMapper">Type mapper.</param>
+        public static T Deserialize<T>(this BinaryReader reader, ITypeMapper typeMapper = null)
+        {
+            if (reader == null) throw new ArgumentNullException(nameof(reader));
+            var context = new SerializationContext(new Dictionary<Type, IExternalSerializationTokensProvider>());
+            if (typeMapper != null)
+            {
+                context.TypeMapper = typeMapper;
+            }
+            return reader.Deserialize<T>(context);
         }
 
         /// <summary>

@@ -5,7 +5,7 @@ namespace Ipatov.BinarySerialization
     /// <summary>
     /// Serialized data reader.
     /// </summary>
-    public interface ISerializationReader : IDisposable
+    public interface ISerializationReader
     {
         /// <summary>
         /// Validate stream preamble.

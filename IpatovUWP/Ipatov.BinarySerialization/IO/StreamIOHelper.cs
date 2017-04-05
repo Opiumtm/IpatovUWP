@@ -36,5 +36,24 @@ namespace Ipatov.BinarySerialization.IO
                 writer.Write(idx);
             }
         }
+
+        /// <summary>
+        /// Read index.
+        /// </summary>
+        /// <param name="reader">Stream reader.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int ReadIndex(this BinaryReader reader)
+        {
+            var f = reader.ReadByte();
+            if (f == 0xFE)
+            {
+                return reader.ReadUInt16();
+            }
+            if (f == 0xFF)
+            {
+                return reader.ReadInt32();
+            }
+            return f;
+        }
     }
 }

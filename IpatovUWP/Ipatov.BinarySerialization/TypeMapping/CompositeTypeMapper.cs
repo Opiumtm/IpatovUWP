@@ -11,6 +11,15 @@ namespace Ipatov.BinarySerialization.TypeMapping
         private readonly ITypeMapper[] _typeMappers;
 
         /// <summary>
+        /// Default composite type mapper.
+        /// </summary>
+        public static readonly ITypeMapper DefaultTypeMapper = new CompositeTypeMapper(
+            new DefaultTypeMapper(),
+            new PrimitiveTypeMapper(),
+            new CommonGenericsTypeMapper()
+            );
+
+        /// <summary>
         /// Constructor.
         /// </summary>
         /// <param name="typeMappers">Type mappers (mapper priority in reverse order, i.e. first mapper - less priority).</param>

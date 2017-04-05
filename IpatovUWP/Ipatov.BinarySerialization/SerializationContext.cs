@@ -21,7 +21,7 @@ namespace Ipatov.BinarySerialization
         private readonly Dictionary<string, int> _stringIndex;
         private readonly IReadOnlyDictionary<Type, IExternalSerializationTokensProvider> _tokensProviders;
         private readonly Stack<Type> _typeStack = new Stack<Type>();
-        private ITypeMapper _typeMapper = DefaultTypeMapper.Instance;
+        private ITypeMapper _typeMapper = CompositeTypeMapper.DefaultTypeMapper;
 
         /// <summary>
         /// Constructor.
@@ -344,7 +344,7 @@ namespace Ipatov.BinarySerialization
         public ITypeMapper TypeMapper
         {
             get { return _typeMapper; }
-            set { _typeMapper = value ?? DefaultTypeMapper.Instance; }
+            set { _typeMapper = value ?? CompositeTypeMapper.DefaultTypeMapper; }
         }
 
         /// <summary>

@@ -95,7 +95,7 @@ namespace Ipatov.BinarySerialization.UwpTests
         {
             var d = new Dictionary<Type, IExternalSerializationTokensProvider>();
             var context = new SerializationContext(new ReadOnlyDictionary<Type, IExternalSerializationTokensProvider>(d));
-            context.TypeMapper = new CompositeTypeMapper(new DefaultTypeMapper(), new PrimitiveTypeMapper(), new CommonGenericsTypeMapper(), new AssemblyTypesMapper(this.GetType().GetTypeInfo().Assembly));
+            context.TypeMapper = new CompositeTypeMapper(CompositeTypeMapper.DefaultTypeMapper, new AssemblyTypesMapper(this.GetType().GetTypeInfo().Assembly));
             var o = new ComplexWrappedClass()
             {
                 Wrapped = new WrappersSubclassTestClass()
@@ -121,6 +121,30 @@ namespace Ipatov.BinarySerialization.UwpTests
             {
                 await str.WriteAsync(serialized, 0, serialized.Length);
             }
+
+            // deserialize
+            context = new SerializationContext(new ReadOnlyDictionary<Type, IExternalSerializationTokensProvider>(d));
+            context.TypeMapper = new CompositeTypeMapper(CompositeTypeMapper.DefaultTypeMapper, new AssemblyTypesMapper(this.GetType().GetTypeInfo().Assembly));
+            ComplexWrappedClass o2;
+            using (var str = new MemoryStream(serialized))
+            {
+                using (var rd = new BinaryReader(str, Encoding.UTF8))
+                {
+                    o2 = rd.Deserialize<ComplexWrappedClass>(context);
+                }
+            }
+
+            Assert.IsNotNull(o2);
+            Assert.IsNotNull(o2.Wrapped);
+            Assert.AreNotSame(o, o2);
+            Assert.AreNotSame(o.Wrapped, o2.Wrapped);
+            var w = o.Wrapped as WrappersSubclassTestClass;
+            var w2 = o2.Wrapped as WrappersSubclassTestClass;
+            Assert.IsNotNull(w);
+            Assert.IsNotNull(w2);
+            Assert.AreEqual(w.TestProperty, w2.TestProperty);
+            Assert.AreEqual(w.TestIntValue, w2.TestIntValue);
+            Assert.AreEqual(w.TestPair, w2.TestPair);
         }
 
         public static bool ComplexDeepClone_isRetrv = false;

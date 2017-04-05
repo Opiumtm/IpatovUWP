@@ -106,6 +106,7 @@ namespace Ipatov.BinarySerialization.IO
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void WriteTokenType(SerializationTokenType type)
         {
             _writer.Write((byte)type);
@@ -127,7 +128,6 @@ namespace Ipatov.BinarySerialization.IO
                     WriteIndex(ctr.ReferenceIndex);
                     break;
                 case SerializedComplexType ct:
-                    _writer.Write((byte)ComplexTypeReferenceKind.ComplexType);
                     if (ct.ObjectType == null)
                     {
                         throw new InvalidOperationException("Serialization error. Complex token object type not specified.");
@@ -138,6 +138,8 @@ namespace Ipatov.BinarySerialization.IO
                         throw new InvalidOperationException($"Serialization error. Cannot map type {ct.ObjectType.FullName}");
                     }
                     var tname = typeName.Value;
+                    _writer.Write((byte)ComplexTypeReferenceKind.ComplexType);
+                    WriteIndex(ct.ReferenceIndex);
                     WriteTypeMapping(context, ref tname);
                     using (var propEnum = ct.Properties.GetEnumerator())
                     {
@@ -155,6 +157,7 @@ namespace Ipatov.BinarySerialization.IO
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void WriteTypeMapping(SerializationContext context, ref SerializationTypeMapping typeName)
         {
             WriteString(context, typeName.Kind ?? "");
