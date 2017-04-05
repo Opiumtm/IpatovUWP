@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
 using Windows.Storage;
 using Ipatov.BinarySerialization.Reflection;
 using Ipatov.BinarySerialization.TokenProviders;
@@ -123,6 +126,7 @@ namespace Ipatov.BinarySerialization.UwpTests
             }
 
             // deserialize
+            d = new Dictionary<Type, IExternalSerializationTokensProvider>();
             context = new SerializationContext(new ReadOnlyDictionary<Type, IExternalSerializationTokensProvider>(d));
             context.TypeMapper = new CompositeTypeMapper(CompositeTypeMapper.DefaultTypeMapper, new AssemblyTypesMapper(this.GetType().GetTypeInfo().Assembly));
             ComplexWrappedClass o2;
@@ -147,16 +151,140 @@ namespace Ipatov.BinarySerialization.UwpTests
             Assert.AreEqual(w.TestPair, w2.TestPair);
         }
 
+        private byte[] SerializeIbsf(ComplexWrappedClass o)
+        {
+            var d = new Dictionary<Type, IExternalSerializationTokensProvider>();
+            var context = new SerializationContext(new ReadOnlyDictionary<Type, IExternalSerializationTokensProvider>(d));
+            context.TypeMapper = new CompositeTypeMapper(CompositeTypeMapper.DefaultTypeMapper, new AssemblyTypesMapper(this.GetType().GetTypeInfo().Assembly));
+            byte[] serialized;
+            using (var str = new MemoryStream())
+            {
+                using (var wr = new BinaryWriter(str, Encoding.UTF8))
+                {
+                    wr.Serialize(o, context);
+                }
+                serialized = str.ToArray();
+            }
+            return serialized;
+        }
+
+        private ComplexWrappedClass DeserializeIbsf(byte[] serialized)
+        {
+            var d = new Dictionary<Type, IExternalSerializationTokensProvider>();
+            var context = new SerializationContext(new ReadOnlyDictionary<Type, IExternalSerializationTokensProvider>(d));
+            context.TypeMapper = new CompositeTypeMapper(CompositeTypeMapper.DefaultTypeMapper, new AssemblyTypesMapper(this.GetType().GetTypeInfo().Assembly));
+            ComplexWrappedClass o2;
+            using (var str = new MemoryStream(serialized))
+            {
+                using (var rd = new BinaryReader(str, Encoding.UTF8))
+                {
+                    o2 = rd.Deserialize<ComplexWrappedClass>(context);
+                }
+            }
+            return o2;
+        }
+
+        private static readonly DataContractSerializer TestSerializer = new DataContractSerializer(typeof(ComplexWrappedClass));
+
+        private byte[] SerializeDataContract(ComplexWrappedClass o)
+        {
+            byte[] serialized;
+            using (var str = new MemoryStream())
+            {
+                using (var wr = XmlDictionaryWriter.CreateBinaryWriter(str))
+                {
+                    TestSerializer.WriteObject(wr, o);
+                    wr.Flush();
+                }
+                serialized = str.ToArray();
+            }
+            return serialized;
+        }
+
+        private ComplexWrappedClass DeserializeDataContract(byte[] serialized)
+        {
+            ComplexWrappedClass o2;
+            using (var str = new MemoryStream(serialized))
+            {
+                using (var rd = XmlDictionaryReader.CreateBinaryReader(str, XmlDictionaryReaderQuotas.Max))
+                {
+                    o2 = TestSerializer.ReadObject(rd) as ComplexWrappedClass;
+                }
+            }
+            return o2;
+        }
+
+        [TestMethod]
+        public void ComplexBinaryWriteBenchmark()
+        {
+            var o = new ComplexWrappedClass()
+            {
+                Wrapped = new WrappersSubclassTestClass()
+                {
+                    TestProperty = "Test string",
+                    TestIntValue = 1024,
+                    TestPair = new KeyValuePair<int, int>(10, 20)
+                }
+            };
+            const int testCount = 10000;
+
+            byte[] serialized = null;
+            ComplexWrappedClass o2 = null;
+
+            Stopwatch sw;
+
+            sw = new Stopwatch();
+            sw.Start();
+            for (var i = 0; i < testCount; i++)
+            {
+                serialized = SerializeIbsf(o);
+            }
+            sw.Stop();
+            Logger.LogMessage($"IBSF serialize: {sw.Elapsed.Ticks}, len = {serialized.Length}");
+
+            sw = new Stopwatch();
+            sw.Start();
+            for (var i = 0; i < testCount; i++)
+            {
+                o2 = DeserializeIbsf(serialized);
+            }
+            sw.Stop();
+            Logger.LogMessage($"IBSF deserialize: {sw.Elapsed.Ticks}");
+
+            sw = new Stopwatch();
+            sw.Start();
+            for (var i = 0; i < testCount; i++)
+            {
+                serialized = SerializeDataContract(o);
+            }
+            sw.Stop();
+            Logger.LogMessage($"Data contract serialize: {sw.Elapsed.Ticks}, len = {serialized.Length}");
+
+            sw = new Stopwatch();
+            sw.Start();
+            for (var i = 0; i < testCount; i++)
+            {
+                o2 = DeserializeDataContract(serialized);
+            }
+            sw.Stop();
+            Logger.LogMessage($"Data contract deserialize: {sw.Elapsed.Ticks}");
+        }
+
         public static bool ComplexDeepClone_isRetrv = false;
     }
 
-    [TypeIdentity("Test.WrappersTestClassBase")]
+    [DataContract]
+    [KnownType(typeof(WrappersTestClass))]
+    [KnownType(typeof(WrappersSubclassTestClass))]
     public class WrappersTestClassBase
     {
+        [DataMember]
         public string TestProperty { get; set; }
     }
 
     [TypeIdentity("Test.WrappersTestClass")]
+    [DataContract]
+    [KnownType(typeof(WrappersSubclassTestClass))]
     public class WrappersTestClass : WrappersTestClassBase, ISerializationTokensProvider
     {
         public virtual IEnumerable<SerializationProperty> GetProperties(SerializationContext context)
@@ -180,10 +308,13 @@ namespace Ipatov.BinarySerialization.UwpTests
     }
 
     [TypeIdentity("Test.WrappersSubclassTestClass")]
+    [DataContract]
     public class WrappersSubclassTestClass : WrappersTestClass, ISerializationTokensProvider
     {
+        [DataMember]
         public int TestIntValue { get; set; }
 
+        [DataMember]
         public KeyValuePair<int, int> TestPair { get; set; }
 
         public IEnumerable<SerializationProperty> GetProperties(SerializationContext context)
@@ -221,8 +352,10 @@ namespace Ipatov.BinarySerialization.UwpTests
 
     [KnownTokenProviders(typeof(WrappedClassKnownProviders))]
     [TypeIdentity("Test.ComplexWrappedClass")]
+    [DataContract]
     public class ComplexWrappedClass : ISerializationTokensProvider
     {
+        [DataMember]
         public WrappersTestClass Wrapped { get; set; }
 
         public IEnumerable<SerializationProperty> GetProperties(SerializationContext context)

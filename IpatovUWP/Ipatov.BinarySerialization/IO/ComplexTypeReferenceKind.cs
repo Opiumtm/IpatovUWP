@@ -8,6 +8,7 @@
         Unknown = 0,
         String = 1,
         ComplexType = 2,
-        ComplexTypeReference = 3
+        ComplexTypeReference = 3,
+        ByteArray = 4,
     }
 }

@@ -123,6 +123,14 @@ namespace Ipatov.BinarySerialization.IO
                     _writer.Write((byte)ComplexTypeReferenceKind.String);
                     WriteString(context, s);
                     break;
+                case byte[] ba:
+                    _writer.Write((byte)ComplexTypeReferenceKind.ByteArray);
+                    WriteIndex(ba.Length);
+                    if (ba.Length > 0)
+                    {
+                        _writer.Write(ba);
+                    }
+                    break;
                 case SerializedComplexTypeReference ctr:
                     _writer.Write((byte)ComplexTypeReferenceKind.ComplexTypeReference);
                     WriteIndex(ctr.ReferenceIndex);

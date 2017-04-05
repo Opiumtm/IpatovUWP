@@ -197,6 +197,26 @@ namespace Ipatov.BinarySerialization.IO
                         TokenType = SerializationTokenType.Reference,
                         Reference = ReadString(context)
                     };
+                case ComplexTypeReferenceKind.ByteArray:
+                    var baLen = _reader.ReadIndex();
+                    if (baLen > 32 * 1024 * 1024)
+                    {
+                        throw new InvalidOperationException("Deserealization error. Byte array too long > 32 Mb");
+                    }
+                    var ba = new byte[baLen];
+                    if (baLen > 0)
+                    {
+                        var baLen2 = _reader.Read(ba, 0, baLen);
+                        if (baLen2 != baLen)
+                        {
+                            throw new InvalidOperationException($"Deserealization error. Requested byte[] len = {baLen}, actual bytes available = {baLen2}");
+                        }
+                    }
+                    return new SerializationToken()
+                    {
+                        TokenType = SerializationTokenType.Reference,
+                        Reference = ba
+                    };
                 case ComplexTypeReferenceKind.ComplexTypeReference:
                     return new SerializationToken()
                     {

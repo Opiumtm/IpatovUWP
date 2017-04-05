@@ -275,6 +275,7 @@ namespace Ipatov.BinarySerialization
             { typeof(DateTimeOffset?), new DateTimeOffsetSerializationTokenValueExtractorNullable()},
             { typeof(Int32Index?), new Int32IndexSerializationTokenValueExtractorNullable()},
             { typeof(string), new ReferenceSerializationTokenValueExtractor<string>()},
+            { typeof(byte[]), new ReferenceSerializationTokenValueExtractor<byte[]>()},
         };
 
         /// <summary>
