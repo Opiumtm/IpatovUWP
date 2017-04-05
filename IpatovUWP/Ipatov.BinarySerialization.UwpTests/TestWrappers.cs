@@ -150,11 +150,13 @@ namespace Ipatov.BinarySerialization.UwpTests
         public static bool ComplexDeepClone_isRetrv = false;
     }
 
+    [TypeIdentity("Test.WrappersTestClassBase")]
     public class WrappersTestClassBase
     {
         public string TestProperty { get; set; }
     }
 
+    [TypeIdentity("Test.WrappersTestClass")]
     public class WrappersTestClass : WrappersTestClassBase, ISerializationTokensProvider
     {
         public virtual IEnumerable<SerializationProperty> GetProperties(SerializationContext context)
@@ -177,6 +179,7 @@ namespace Ipatov.BinarySerialization.UwpTests
         }
     }
 
+    [TypeIdentity("Test.WrappersSubclassTestClass")]
     public class WrappersSubclassTestClass : WrappersTestClass, ISerializationTokensProvider
     {
         public int TestIntValue { get; set; }

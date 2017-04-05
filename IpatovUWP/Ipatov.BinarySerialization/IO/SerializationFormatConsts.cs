@@ -16,6 +16,6 @@
         /// <summary>
         /// Version.
         /// </summary>
-        public static readonly ushort Version = 0x1000;
+        public static readonly ushort Version = 0x0100;
     }
 }
