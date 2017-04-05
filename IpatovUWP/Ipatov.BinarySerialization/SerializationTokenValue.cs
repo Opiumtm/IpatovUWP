@@ -93,5 +93,10 @@ namespace Ipatov.BinarySerialization
         /// Значение типа DateTimeOffset.
         /// </summary>
         [FieldOffset(0)] public DateTimeOffset DateTimeOffsetValue;
+
+        /// <summary>
+        /// Значение типа DateTimeOffset.
+        /// </summary>
+        [FieldOffset(0)] public Int32Index Int32IndexValue;
     }
 }

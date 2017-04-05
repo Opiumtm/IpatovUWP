@@ -100,6 +100,9 @@ namespace Ipatov.BinarySerialization.IO
                     _writer.Write(token.Value.DateTimeOffsetValue.UtcDateTime.Ticks);
                     _writer.Write(token.Value.DateTimeOffsetValue.Offset.Ticks);
                     break;
+                case SerializationTokenType.Int32Index:
+                    WriteIndex(token.Value.Int32IndexValue);
+                    break;
             }
         }
 
@@ -134,14 +137,8 @@ namespace Ipatov.BinarySerialization.IO
                     {
                         throw new InvalidOperationException($"Serialization error. Cannot map type {ct.ObjectType.FullName}");
                     }
-                    WriteString(context, typeName.Value.Kind ?? "");
-                    WriteString(context, typeName.Value.Type ?? "");
-                    var a = typeName.Value.TypeParameters ?? new string[0];
-                    WriteIndex(a.Length);
-                    for (var i = 0; i < a.Length; i++)
-                    {
-                        WriteString(context, a[i] ?? "");
-                    }
+                    var tname = typeName.Value;
+                    WriteTypeMapping(context, ref tname);
                     using (var propEnum = ct.Properties.GetEnumerator())
                     {
                         while (propEnum.MoveNext())
@@ -155,6 +152,18 @@ namespace Ipatov.BinarySerialization.IO
                     break;
                 default:
                     throw new InvalidOperationException($"Serialization error. Unrecognized reference type {reference.GetType().FullName}");
+            }
+        }
+
+        private void WriteTypeMapping(SerializationContext context, ref SerializationTypeMapping typeName)
+        {
+            WriteString(context, typeName.Kind ?? "");
+            WriteString(context, typeName.Type ?? "");
+            var a = typeName.TypeParameters ?? new SerializationTypeMapping[0];
+            WriteIndex(a.Length);
+            for (var i = 0; i < a.Length; i++)
+            {
+                WriteTypeMapping(context, ref a[i]);
             }
         }
 
@@ -172,23 +181,7 @@ namespace Ipatov.BinarySerialization.IO
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void WriteIndex(int idx)
         {
-            if (idx < 0)
-            {
-                throw new InvalidOperationException("Serialization error. Negative index value.");
-            }
-            if (idx < 0xFE)
-            {
-                _writer.Write((byte)idx);
-            } else if (idx < 0xFFFF)
-            {
-                _writer.Write((byte)0xFE);
-                _writer.Write((ushort)idx);
-            }
-            else
-            {
-                _writer.Write((byte)0xFF);
-                _writer.Write(idx);
-            }
+            _writer.WriteIndex(idx);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

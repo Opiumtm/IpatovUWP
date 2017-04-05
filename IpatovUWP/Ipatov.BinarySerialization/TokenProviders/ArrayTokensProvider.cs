@@ -21,7 +21,11 @@ namespace Ipatov.BinarySerialization.TokenProviders
             yield return new SerializationProperty()
             {
                 Property = "Count",
-                Token = source.Length
+                Token = new SerializationToken()
+                {
+                    TokenType = SerializationTokenType.Int32Index,
+                    Value = new SerializationTokenValue() { Int32IndexValue = source.Length }
+                }
             };
             foreach (var item in source)
             {
@@ -53,8 +57,8 @@ namespace Ipatov.BinarySerialization.TokenProviders
                         {
                             throw new InvalidOperationException("Invalid token in array serialization. Count already speficied.");
                         }
-                        SerializationToken.CheckType(SerializationTokenType.Int32, property.Token.TokenType);
-                        len = property.Token.Value.Int32Value;
+                        SerializationToken.CheckType(SerializationTokenType.Int32Index, property.Token.TokenType);
+                        len = property.Token.Value.Int32IndexValue;
                         result = new T[len];
                         break;
                     case "Item":

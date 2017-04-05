@@ -80,6 +80,10 @@
         /// <summary>
         /// DateTimeOffset.
         /// </summary>
-        DateTimeOffset = 18
+        DateTimeOffset = 18,
+        /// <summary>
+        /// Int32 index.
+        /// </summary>
+        Int32Index = 19
     }
 }

@@ -86,6 +86,11 @@ namespace Ipatov.BinarySerialization
         /// <returns>Value.</returns>
         public static T ExtractValue<T>(this SerializationContext context, ref SerializationToken token)
         {
+            var extractor = SerializationToken.GetExtractor<T>();
+            if (extractor != null)
+            {
+                return extractor.GetValue(ref token);
+            }
             if (token.TokenType == SerializationTokenType.Nothing)
             {
                 return default(T);
@@ -131,24 +136,7 @@ namespace Ipatov.BinarySerialization
                     }
                 }
             }
-            return ExtractValueInternal<T>(ref token);
-        }
-
-        /// <summary>
-        /// Extract value from token.
-        /// </summary>
-        /// <typeparam name="T">Expected value type.</typeparam>
-        /// <param name="token">Serialization token.</param>
-        /// <returns>Value.</returns>
-        private static T ExtractValueInternal<T>(ref SerializationToken token)
-        {
-            var extractor = SerializationToken.GetExtractor<T>();
-            if (extractor != null)
-            {
-                return extractor.GetValue(token);
-            }
-            SerializationToken.CheckType(SerializationTokenType.Reference, token.TokenType);
-            return (T)token.Reference;
+            throw new InvalidOperationException("Could not extract token value.");
         }
 
         /// <summary>

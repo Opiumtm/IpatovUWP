@@ -236,7 +236,7 @@ namespace Ipatov.BinarySerialization
             };
         }
 
-        private static readonly Dictionary<Type, object> ValueExtractors = new Dictionary<Type, object>()
+        private static readonly Dictionary<Type, SerializationTokenValueExtractor> ValueExtractors = new Dictionary<Type, SerializationTokenValueExtractor>()
         {
             { typeof(Byte), new ByteSerializationTokenValueExtractor()},
             { typeof(SByte), new SByteSerializationTokenValueExtractor()},
@@ -255,6 +255,25 @@ namespace Ipatov.BinarySerialization
             { typeof(DateTime), new DateTimeSerializationTokenValueExtractor()},
             { typeof(TimeSpan), new TimeSpanSerializationTokenValueExtractor()},
             { typeof(DateTimeOffset), new DateTimeOffsetSerializationTokenValueExtractor()},
+            { typeof(Int32Index), new Int32IndexSerializationTokenValueExtractor()},
+            { typeof(Byte?), new ByteSerializationTokenValueExtractorNullable()},
+            { typeof(SByte?), new SByteSerializationTokenValueExtractorNullable()},
+            { typeof(Int16?), new Int16SerializationTokenValueExtractorNullable()},
+            { typeof(UInt16?), new UInt16SerializationTokenValueExtractorNullable()},
+            { typeof(Int32?), new Int32SerializationTokenValueExtractorNullable()},
+            { typeof(UInt32?), new UInt32SerializationTokenValueExtractorNullable()},
+            { typeof(Int64?), new Int64SerializationTokenValueExtractorNullable()},
+            { typeof(UInt64?), new UInt64SerializationTokenValueExtractorNullable()},
+            { typeof(Single?), new SingleSerializationTokenValueExtractorNullable()},
+            { typeof(Double?), new DoubleSerializationTokenValueExtractorNullable()},
+            { typeof(Decimal?), new DecimalSerializationTokenValueExtractorNullable()},
+            { typeof(Boolean?), new BooleanSerializationTokenValueExtractorNullable()},
+            { typeof(Char?), new CharSerializationTokenValueExtractorNullable()},
+            { typeof(Guid?), new GuidSerializationTokenValueExtractorNullable()},
+            { typeof(DateTime?), new DateTimeSerializationTokenValueExtractorNullable()},
+            { typeof(TimeSpan?), new TimeSpanSerializationTokenValueExtractorNullable()},
+            { typeof(DateTimeOffset?), new DateTimeOffsetSerializationTokenValueExtractorNullable()},
+            { typeof(Int32Index?), new Int32IndexSerializationTokenValueExtractorNullable()},
             { typeof(string), new ReferenceSerializationTokenValueExtractor<string>()},
         };
 
@@ -296,7 +315,7 @@ namespace Ipatov.BinarySerialization
         {
             if (ValueExtractors.ContainsKey(type))
             {
-                return ValueExtractors[type] as SerializationTokenValueExtractor;
+                return ValueExtractors[type];
             }
             return null;
         }

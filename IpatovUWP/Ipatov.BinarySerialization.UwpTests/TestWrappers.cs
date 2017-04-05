@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.Storage;
 using Ipatov.BinarySerialization.Reflection;
 using Ipatov.BinarySerialization.TokenProviders;
+using Ipatov.BinarySerialization.TypeMapping;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.VisualStudio.TestTools.UnitTesting.Logging;
 
@@ -93,6 +95,7 @@ namespace Ipatov.BinarySerialization.UwpTests
         {
             var d = new Dictionary<Type, IExternalSerializationTokensProvider>();
             var context = new SerializationContext(new ReadOnlyDictionary<Type, IExternalSerializationTokensProvider>(d));
+            context.TypeMapper = new CompositeTypeMapper(new DefaultTypeMapper(), new PrimitiveTypeMapper(), new CommonGenericsTypeMapper(), new AssemblyTypesMapper(this.GetType().GetTypeInfo().Assembly));
             var o = new ComplexWrappedClass()
             {
                 Wrapped = new WrappersSubclassTestClass()
@@ -190,6 +193,7 @@ namespace Ipatov.BinarySerialization.UwpTests
     }
 
     [KnownTokenProviders(typeof(WrappedClassKnownProviders))]
+    [TypeIdentity("Test.ComplexWrappedClass")]
     public class ComplexWrappedClass : ISerializationTokensProvider
     {
         public WrappersTestClass Wrapped { get; set; }

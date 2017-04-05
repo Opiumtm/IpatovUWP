@@ -347,6 +347,11 @@ namespace Ipatov.BinarySerialization
             set { _typeMapper = value ?? DefaultTypeMapper.Instance; }
         }
 
+        /// <summary>
+        /// Additional data.
+        /// </summary>
+        public Dictionary<object, object> AdditionalData { get; } = new Dictionary<object, object>();
+
         private struct SubsclassDesc : IEquatable<SubsclassDesc>
         {
             public Type ParentType;
