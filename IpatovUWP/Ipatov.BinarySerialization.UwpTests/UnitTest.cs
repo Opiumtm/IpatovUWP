@@ -103,7 +103,7 @@ namespace Ipatov.BinarySerialization.UwpTests
             object s1 = "test";
             var sw = new Stopwatch();
             sw.Start();
-            for (var i = 0; i < 10000000; i++)
+            for (var i = 0; i < 1000; i++)
             {
                 o.TestProperty = "test";
                 var s = o.TestProperty;
@@ -112,7 +112,7 @@ namespace Ipatov.BinarySerialization.UwpTests
             var direct = sw.ElapsedMilliseconds;
             sw = new Stopwatch();
             sw.Start();
-            for (var i = 0; i < 10000000; i++)
+            for (var i = 0; i < 1000; i++)
             {
                 property.Set(o, "test");
                 var s = property.Get<TestClass, string>(o);
@@ -121,7 +121,7 @@ namespace Ipatov.BinarySerialization.UwpTests
             var propGeneric = sw.ElapsedMilliseconds;
             sw = new Stopwatch();
             sw.Start();
-            for (var i = 0; i < 10000000; i++)
+            for (var i = 0; i < 1000; i++)
             {
                 property.Set(o1, s1);
                 var s = (string)property.Get(o);

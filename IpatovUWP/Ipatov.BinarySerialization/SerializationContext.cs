@@ -17,8 +17,7 @@ namespace Ipatov.BinarySerialization
     {
         private readonly Dictionary<int, object> _objects;
         private readonly Dictionary<object, int> _index;
-        private readonly Dictionary<int, string> _strings;
-        private readonly Dictionary<string, int> _stringIndex;
+        private readonly KnownStringIndex _knownStrings;
         private readonly IReadOnlyDictionary<Type, IExternalSerializationTokensProvider> _tokensProviders;
         private readonly Stack<Type> _typeStack = new Stack<Type>();
         private ITypeMapper _typeMapper = CompositeTypeMapper.DefaultTypeMapper;
@@ -34,8 +33,7 @@ namespace Ipatov.BinarySerialization
             _index = new Dictionary<object, int>();
             _tokensProviders = tokensProviders;            
             _subclasses = new LazyDictionary<SubsclassDesc, IExternalSerializationTokensProvider>(GetSubclassWrapper);
-            _strings = new Dictionary<int, string>();
-            _stringIndex = new Dictionary<string, int>(StringComparer.Ordinal);
+            _knownStrings = new KnownStringIndex();
         }
 
         /// <summary>
@@ -50,8 +48,7 @@ namespace Ipatov.BinarySerialization
             {
                 return _index[obj];
             }
-            var m = _objects.Keys.DefaultIfEmpty(-1).Max();
-            var idx = m + 1;
+            var idx = _objects.Count;
             _objects[idx] = obj;
             _index[obj] = idx;
             return idx;
@@ -64,16 +61,7 @@ namespace Ipatov.BinarySerialization
         /// <returns>Object index.</returns>
         public int AddString(string obj)
         {
-            if (obj == null) throw new ArgumentNullException(nameof(obj));
-            if (_stringIndex.ContainsKey(obj))
-            {
-                return _stringIndex[obj];
-            }
-            var m = _strings.Keys.DefaultIfEmpty(-1).Max();
-            var idx = m + 1;
-            _strings[idx] = obj;
-            _stringIndex[obj] = idx;
-            return idx;
+            return _knownStrings.AddString(obj);
         }
 
         /// <summary>
@@ -97,9 +85,7 @@ namespace Ipatov.BinarySerialization
         /// <returns>Object index.</returns>
         public void AddString(int idx, string obj)
         {
-            if (obj == null) throw new ArgumentNullException(nameof(obj));
-            _strings[idx] = obj;
-            _stringIndex[obj] = idx;
+            _knownStrings.AddString(idx, obj);
         }
 
         /// <summary>
@@ -119,7 +105,7 @@ namespace Ipatov.BinarySerialization
         /// <returns>Object</returns>
         public string GetString(int index)
         {
-            return _strings.ContainsKey(index) ? _strings[index] : null;
+            return _knownStrings.GetString(index);
         }
 
         /// <summary>
@@ -140,8 +126,7 @@ namespace Ipatov.BinarySerialization
         /// <returns>Index or null if not exists.</returns>
         public int? IsStringReferenced(string obj)
         {
-            if (obj == null) throw new ArgumentNullException(nameof(obj));
-            return _stringIndex.ContainsKey(obj) ? (int?)_stringIndex[obj] : null;
+            return _knownStrings.IsStringReferenced(obj);
         }
 
         /// <summary>

@@ -151,11 +151,13 @@ namespace Ipatov.BinarySerialization.UwpTests
             Assert.AreEqual(w.TestPair, w2.TestPair);
         }
 
+        private static readonly ITypeMapper AssemblyMapper = new AssemblyTypesMapper(typeof(ComplexWrappedClass).GetTypeInfo().Assembly);
+
         private byte[] SerializeIbsf(ComplexWrappedClass o)
         {
             var d = new Dictionary<Type, IExternalSerializationTokensProvider>();
             var context = new SerializationContext(new ReadOnlyDictionary<Type, IExternalSerializationTokensProvider>(d));
-            context.TypeMapper = new CompositeTypeMapper(CompositeTypeMapper.DefaultTypeMapper, new AssemblyTypesMapper(this.GetType().GetTypeInfo().Assembly));
+            context.TypeMapper = new CompositeTypeMapper(CompositeTypeMapper.DefaultTypeMapper, AssemblyMapper);
             byte[] serialized;
             using (var str = new MemoryStream())
             {
@@ -172,7 +174,7 @@ namespace Ipatov.BinarySerialization.UwpTests
         {
             var d = new Dictionary<Type, IExternalSerializationTokensProvider>();
             var context = new SerializationContext(new ReadOnlyDictionary<Type, IExternalSerializationTokensProvider>(d));
-            context.TypeMapper = new CompositeTypeMapper(CompositeTypeMapper.DefaultTypeMapper, new AssemblyTypesMapper(this.GetType().GetTypeInfo().Assembly));
+            context.TypeMapper = new CompositeTypeMapper(CompositeTypeMapper.DefaultTypeMapper, AssemblyMapper);
             ComplexWrappedClass o2;
             using (var str = new MemoryStream(serialized))
             {
