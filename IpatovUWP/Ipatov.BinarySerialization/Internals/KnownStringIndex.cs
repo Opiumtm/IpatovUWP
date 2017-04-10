@@ -68,7 +68,11 @@ namespace Ipatov.BinarySerialization.Internals
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private int? FindIndex(string obj)
         {
-            return _indexes.ContainsKey(obj) ? (int?) _indexes[obj] : null;
+            if (_indexes.TryGetValue(obj, out var v))
+            {
+                return v;
+            }
+            return null;
         }
 
         /// <summary>
