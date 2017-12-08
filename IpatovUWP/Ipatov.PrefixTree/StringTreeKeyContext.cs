@@ -1,23 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace Ipatov.DataStructures
 {
     /// <summary>
     /// Key context for string.
     /// </summary>
-    public sealed class StringTreeKeyContext : IPrefixTreeKeyContext<string, char, StringTreeKeyContext.KeyEnumerator>
+    public sealed class StringTreeKeyContext : IPrefixTreeKeyContext<string, char, StringTreeKeyContext.KeyEnumerator, StringTreeKeyContext.KeyComparer>
     {
         /// <summary>
         /// Constructor.
         /// </summary>
-        /// <param name="charComparer">Characters comparer.</param>
-        public StringTreeKeyContext(IComparer<char> charComparer = null)
+        /// <param name="ignoreCase">Ignore character case.</param>
+        public StringTreeKeyContext(bool ignoreCase)
         {
-            KeyElementComparer = charComparer ?? Comparer<char>.Default;
+            KeyElementComparer = new KeyComparer(ignoreCase);
         }
 
-        public IComparer<char> KeyElementComparer { get; }
+        public StringTreeKeyContext.KeyComparer KeyElementComparer { get; }
 
         /// <summary>
         /// Compose key from key elements.
@@ -68,6 +69,25 @@ namespace Ipatov.DataStructures
                     return r;
                 }
                 return MaybeKeyElement<char>.Empty();
+            }
+        }
+
+        public struct KeyComparer : IComparer<char>
+        {
+            private readonly bool _ignoreCase;
+
+            public KeyComparer(bool ignoreCase)
+            {
+                _ignoreCase = ignoreCase;
+            }
+
+            public int Compare(char x, char y)
+            {
+                if (_ignoreCase)
+                {
+                    return char.ToLowerInvariant(x) - char.ToLowerInvariant(y);
+                }
+                return x - y;
             }
         }
     }

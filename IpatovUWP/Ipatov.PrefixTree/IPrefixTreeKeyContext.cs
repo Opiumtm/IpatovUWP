@@ -5,13 +5,14 @@ namespace Ipatov.DataStructures
     /// <summary>
     /// Prefix tree key context.
     /// </summary>
-    public interface IPrefixTreeKeyContext<TKey, TKeyElement, out TKeyEnum>
+    public interface IPrefixTreeKeyContext<TKey, TKeyElement, out TKeyEnum, out TComparer>
         where TKeyEnum : IKeyElementsEnumerator<TKeyElement>
+        where TComparer : IComparer<TKeyElement>
     {
         /// <summary>
         /// Key element comparer.
         /// </summary>
-        IComparer<TKeyElement> KeyElementComparer { get; }
+        TComparer KeyElementComparer { get; }
 
         /// <summary>
         /// Compose key from key elements.

@@ -3,7 +3,8 @@ using System.Collections.Generic;
 
 namespace Ipatov.DataStructures
 {
-    public sealed class ArrayTreeKeyContext<TKeyElement> : IPrefixTreeKeyContext<TKeyElement[], TKeyElement, ArrayTreeKeyContext<TKeyElement>.KeyEnumerator>
+    public sealed class ArrayTreeKeyContext<TKeyElement, TKeyComparer> : IPrefixTreeKeyContext<TKeyElement[], TKeyElement, ArrayTreeKeyContext<TKeyElement, TKeyComparer>.KeyEnumerator, TKeyComparer>
+        where TKeyComparer : IComparer<TKeyElement>
     {
         /// <summary>
         /// Key enumerator.
@@ -33,15 +34,19 @@ namespace Ipatov.DataStructures
             }
         }
 
-        public ArrayTreeKeyContext(IComparer<TKeyElement> keyElementComparer)
+        public ArrayTreeKeyContext(TKeyComparer keyElementComparer)
         {
-            KeyElementComparer = keyElementComparer ?? Comparer<TKeyElement>.Default;
+            if (keyElementComparer == null)
+            {
+                throw new ArgumentNullException(nameof(keyElementComparer));
+            }
+            KeyElementComparer = keyElementComparer;
         }
 
         /// <summary>
         /// Key element comparer.
         /// </summary>
-        public IComparer<TKeyElement> KeyElementComparer { get; }
+        public TKeyComparer KeyElementComparer { get; }
 
         public TKeyElement[] ComposeKey(List<TKeyElement> keyElements)
         {

@@ -7,9 +7,11 @@ namespace Ipatov.DataStructures
     /// </summary>
     /// <typeparam name="TKeyElement">Type of array element.</typeparam>
     /// <typeparam name="TValue">Type of value.</typeparam>
-    public class ArrayPrefixTreeDictionary<TKeyElement, TValue> : PrefixTreeDictionary<TKeyElement[], TKeyElement, TValue, ArrayTreeKeyContext<TKeyElement>.KeyEnumerator>
+    /// <typeparam name="TKeyComparer">Key element comparer.</typeparam>
+    public class ArrayPrefixTreeDictionary<TKeyElement, TValue, TKeyComparer> : PrefixTreeDictionary<TKeyElement[], TKeyElement, TValue, ArrayTreeKeyContext<TKeyElement, TKeyComparer>.KeyEnumerator, TKeyComparer>
+        where TKeyComparer : IComparer<TKeyElement>
     {
-        public ArrayPrefixTreeDictionary(IComparer<TKeyElement> elementComparer = null) : base(new ArrayTreeKeyContext<TKeyElement>(elementComparer))
+        public ArrayPrefixTreeDictionary(TKeyComparer elementComparer) : base(new ArrayTreeKeyContext<TKeyElement, TKeyComparer>(elementComparer))
         {
         }
     }

@@ -7,7 +7,7 @@ namespace Ipatov.PrefixTree.ConsoleTest
     {
         static void Main(string[] args)
         {
-            var testDic = new StringPrefixTreeDictionary<int>();
+            var testDic = new StringPrefixTreeDictionary<int>(false);
 
             void SetValue(string key, int value)
             {

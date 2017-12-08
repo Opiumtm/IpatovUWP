@@ -7,16 +7,17 @@ using System.Threading;
 
 namespace Ipatov.DataStructures
 {
-    public class PrefixTreeDictionary<TKey, TKeyElement, TValue, TKeyEnum> : IDictionary<TKey, TValue>
+    public class PrefixTreeDictionary<TKey, TKeyElement, TValue, TKeyEnum, TComparer> : IDictionary<TKey, TValue>
         where TKeyEnum : struct, IKeyElementsEnumerator<TKeyElement>
+        where TComparer : IComparer<TKeyElement>
     {
-        private readonly IComparer<TKeyElement> _comparer;
-        private readonly IPrefixTreeKeyContext<TKey, TKeyElement, TKeyEnum> _keyContext;
+        private readonly TComparer _comparer;
+        private readonly IPrefixTreeKeyContext<TKey, TKeyElement, TKeyEnum, TComparer> _keyContext;
 
-        public PrefixTreeDictionary(IPrefixTreeKeyContext<TKey, TKeyElement, TKeyEnum> context)
+        public PrefixTreeDictionary(IPrefixTreeKeyContext<TKey, TKeyElement, TKeyEnum, TComparer> context)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
-            _comparer = context.KeyElementComparer ?? Comparer<TKeyElement>.Default;
+            _comparer = context.KeyElementComparer;
             _keyContext = context;
             _rootNode = new NodeBase(_comparer);
             _count = 0;
@@ -371,13 +372,13 @@ namespace Ipatov.DataStructures
 
         private class NodeBase
         {
-            protected readonly IComparer<TKeyElement> Comparer;
+            protected readonly TComparer Comparer;
 
             public SortedDictionary<TKeyElement, Node> Children { get; protected set; }
 
             public LeafNode LeafNode;
 
-            public NodeBase(IComparer<TKeyElement> comparer)
+            public NodeBase(TComparer comparer)
             {
                 Children = new SortedDictionary<TKeyElement, Node>(comparer);
                 Comparer = comparer;
@@ -414,7 +415,7 @@ namespace Ipatov.DataStructures
             public List<TKeyElement> KeyRange;
             public readonly TKeyElement KeyPrefix;
 
-            public Node(IComparer<TKeyElement> comparer, NodeBase parent, TKeyElement keyPrefix) : base(comparer)
+            public Node(TComparer comparer, NodeBase parent, TKeyElement keyPrefix) : base(comparer)
             {
                 KeyRange = new List<TKeyElement>();
                 Parent = parent;
