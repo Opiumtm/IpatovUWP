@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26403.0
+VisualStudioVersion = 15.0.27130.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ipatov.DataBindings", "Ipatov.DataBindings\Ipatov.DataBindings.csproj", "{E94D353D-D0E6-4D13-85EC-FBF5BB9478A7}"
 EndProject
@@ -25,11 +25,17 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ipatov.Async.Portable", "Ip
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Serialization", "Serialization", "{1133E14C-D3E2-4D30-822A-B7A563AADBDA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ipatov.BinarySerialization", "Ipatov.BinarySerialization\Ipatov.BinarySerialization.csproj", "{3C72FF5C-3AE0-4B8F-97B3-9FACE10E8769}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ipatov.BinarySerialization", "Ipatov.BinarySerialization\Ipatov.BinarySerialization.csproj", "{3C72FF5C-3AE0-4B8F-97B3-9FACE10E8769}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ipatov.BinarySerialization.UwpTests", "Ipatov.BinarySerialization.UwpTests\Ipatov.BinarySerialization.UwpTests.csproj", "{C81951CD-8752-4514-ABF9-7105D19FB3EF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ipatov.Collections", "Ipatov.Collections\Ipatov.Collections.csproj", "{33B5BE0D-CA3D-4B73-B522-F13F3382F0DA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ipatov.Collections", "Ipatov.Collections\Ipatov.Collections.csproj", "{33B5BE0D-CA3D-4B73-B522-F13F3382F0DA}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ipatov.PrefixTree", "Ipatov.PrefixTree\Ipatov.PrefixTree.csproj", "{08085AE2-0118-496B-B7F1-18A709F16A17}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PrefixTree", "PrefixTree", "{35CF05DE-F58C-4CBE-B7C5-2B7A60E4A4CE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ipatov.PrefixTree.ConsoleTest", "Ipatov.PrefixTree.ConsoleTest\Ipatov.PrefixTree.ConsoleTest.csproj", "{94264427-23B4-4581-B4D6-BF4A861A4B36}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -231,6 +237,38 @@ Global
 		{33B5BE0D-CA3D-4B73-B522-F13F3382F0DA}.Release|x64.Build.0 = Release|Any CPU
 		{33B5BE0D-CA3D-4B73-B522-F13F3382F0DA}.Release|x86.ActiveCfg = Release|Any CPU
 		{33B5BE0D-CA3D-4B73-B522-F13F3382F0DA}.Release|x86.Build.0 = Release|Any CPU
+		{08085AE2-0118-496B-B7F1-18A709F16A17}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{08085AE2-0118-496B-B7F1-18A709F16A17}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{08085AE2-0118-496B-B7F1-18A709F16A17}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{08085AE2-0118-496B-B7F1-18A709F16A17}.Debug|ARM.Build.0 = Debug|Any CPU
+		{08085AE2-0118-496B-B7F1-18A709F16A17}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{08085AE2-0118-496B-B7F1-18A709F16A17}.Debug|x64.Build.0 = Debug|Any CPU
+		{08085AE2-0118-496B-B7F1-18A709F16A17}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{08085AE2-0118-496B-B7F1-18A709F16A17}.Debug|x86.Build.0 = Debug|Any CPU
+		{08085AE2-0118-496B-B7F1-18A709F16A17}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{08085AE2-0118-496B-B7F1-18A709F16A17}.Release|Any CPU.Build.0 = Release|Any CPU
+		{08085AE2-0118-496B-B7F1-18A709F16A17}.Release|ARM.ActiveCfg = Release|Any CPU
+		{08085AE2-0118-496B-B7F1-18A709F16A17}.Release|ARM.Build.0 = Release|Any CPU
+		{08085AE2-0118-496B-B7F1-18A709F16A17}.Release|x64.ActiveCfg = Release|Any CPU
+		{08085AE2-0118-496B-B7F1-18A709F16A17}.Release|x64.Build.0 = Release|Any CPU
+		{08085AE2-0118-496B-B7F1-18A709F16A17}.Release|x86.ActiveCfg = Release|Any CPU
+		{08085AE2-0118-496B-B7F1-18A709F16A17}.Release|x86.Build.0 = Release|Any CPU
+		{94264427-23B4-4581-B4D6-BF4A861A4B36}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{94264427-23B4-4581-B4D6-BF4A861A4B36}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{94264427-23B4-4581-B4D6-BF4A861A4B36}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{94264427-23B4-4581-B4D6-BF4A861A4B36}.Debug|ARM.Build.0 = Debug|Any CPU
+		{94264427-23B4-4581-B4D6-BF4A861A4B36}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{94264427-23B4-4581-B4D6-BF4A861A4B36}.Debug|x64.Build.0 = Debug|Any CPU
+		{94264427-23B4-4581-B4D6-BF4A861A4B36}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{94264427-23B4-4581-B4D6-BF4A861A4B36}.Debug|x86.Build.0 = Debug|Any CPU
+		{94264427-23B4-4581-B4D6-BF4A861A4B36}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{94264427-23B4-4581-B4D6-BF4A861A4B36}.Release|Any CPU.Build.0 = Release|Any CPU
+		{94264427-23B4-4581-B4D6-BF4A861A4B36}.Release|ARM.ActiveCfg = Release|Any CPU
+		{94264427-23B4-4581-B4D6-BF4A861A4B36}.Release|ARM.Build.0 = Release|Any CPU
+		{94264427-23B4-4581-B4D6-BF4A861A4B36}.Release|x64.ActiveCfg = Release|Any CPU
+		{94264427-23B4-4581-B4D6-BF4A861A4B36}.Release|x64.Build.0 = Release|Any CPU
+		{94264427-23B4-4581-B4D6-BF4A861A4B36}.Release|x86.ActiveCfg = Release|Any CPU
+		{94264427-23B4-4581-B4D6-BF4A861A4B36}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -243,5 +281,10 @@ Global
 		{BB4CC8F5-B59A-42A5-9D66-F010BA052FEC} = {8AA31863-565A-4182-9049-BBC18FFB1C15}
 		{3C72FF5C-3AE0-4B8F-97B3-9FACE10E8769} = {1133E14C-D3E2-4D30-822A-B7A563AADBDA}
 		{C81951CD-8752-4514-ABF9-7105D19FB3EF} = {1133E14C-D3E2-4D30-822A-B7A563AADBDA}
+		{08085AE2-0118-496B-B7F1-18A709F16A17} = {35CF05DE-F58C-4CBE-B7C5-2B7A60E4A4CE}
+		{94264427-23B4-4581-B4D6-BF4A861A4B36} = {35CF05DE-F58C-4CBE-B7C5-2B7A60E4A4CE}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B186621E-81A0-4941-9223-6D0598A091F5}
 	EndGlobalSection
 EndGlobal
