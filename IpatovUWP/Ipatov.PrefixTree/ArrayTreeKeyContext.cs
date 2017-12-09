@@ -22,15 +22,16 @@ namespace Ipatov.DataStructures
                 _len = str.Length;
             }
 
-            public MaybeKeyElement<TKeyElement> GetNextKeyElement()
+            public bool GetNextKeyElement(out TKeyElement element)
             {
                 if (_cnt < _len)
                 {
-                    var r = _str[_cnt];
+                    element = _str[_cnt];
                     _cnt++;
-                    return r;
+                    return true;
                 }
-                return MaybeKeyElement<TKeyElement>.Empty();
+                element = default(TKeyElement);
+                return false;
             }
         }
 

@@ -55,20 +55,21 @@ namespace Ipatov.DataStructures
 
             public KeyEnumerator(string str) : this()
             {
-                _str = str ?? throw new ArgumentNullException(nameof(str));
+                _str = str ?? throw new ArgumentNullException(nameof(str));                
                 _cnt = 0;
                 _len = str.Length;
             }
 
-            public MaybeKeyElement<char> GetNextKeyElement()
+            public bool GetNextKeyElement(out char element)
             {
                 if (_cnt < _len)
-                {
-                    var r = _str[_cnt];
+                {                    
+                    element = _str[_cnt];
                     _cnt++;
-                    return r;
+                    return true;
                 }
-                return MaybeKeyElement<char>.Empty();
+                element = default(char);
+                return false;
             }
         }
 

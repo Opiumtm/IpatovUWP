@@ -189,15 +189,15 @@ namespace Ipatov.DataStructures
             void AddToNewNode()
             {
                 var newNode = node.Node.AddNode(node.LastKey.Element);
-                MaybeKeyElement<TKeyElement> remaining;
+                bool isPresent;
                 do
                 {
-                    remaining = keyGetter.GetNextKeyElement();
-                    if (remaining.IsPresent)
+                    isPresent = keyGetter.GetNextKeyElement(out var remaining);
+                    if (isPresent)
                     {
-                        newNode.KeyRange.Add(remaining.Element);
+                        newNode.KeyRange.Add(remaining);
                     }
-                } while (remaining.IsPresent);
+                } while (isPresent);
                 newNode.LeafNode = new LeafNode(newNode, value);
                 ElementAdded();
             }
@@ -272,79 +272,108 @@ namespace Ipatov.DataStructures
             return FindLeafsRecursive(_rootNode);
         }
 
-        private LeafNode FindLeafRecursive(NodeBase rootNode, ref TKeyEnum getNextKey)
+        private LeafNode FindLeafRecursive(NodeBase rootNode0, ref TKeyEnum getNextKey)
         {
-            var key = getNextKey.GetNextKeyElement();
-            if (!key.IsPresent)
+            var rootNode = rootNode0;
+            do
             {
-                return rootNode.LeafNode;
-            }
-            if (!rootNode.Children.ContainsKey(key.Element))
-            {
-                return null;
-            }
-            var c = rootNode.Children[key.Element];
-            if (c is Node n)
-            {
-                foreach (var kr in n.KeyRange)
+                if (rootNode == null)
                 {
-                    var key2 = getNextKey.GetNextKeyElement();
-                    if (!key2.IsPresent || _comparer.Compare(key2.Element, kr) != 0)
+                    return null;
+                }
+                var isPresent = getNextKey.GetNextKeyElement(out var key);
+                if (!isPresent)
+                {
+                    return rootNode.LeafNode;
+                }
+                Node c;
+                if (!rootNode.Children.TryGetValue(key, out c))
+                {
+                    return null;
+                }
+                if (c is Node n)
+                {
+                    //foreach (var kr in n.KeyRange)
+                    for (var kri = 0; kri < n.KeyRange.Count; kri++)
                     {
-                        return null;
+                        var kr = n.KeyRange[kri];
+                        var isPresent2 = getNextKey.GetNextKeyElement(out var key2);
+                        if (!isPresent2 || _comparer.Compare(key2, kr) != 0)
+                        {
+                            return null;
+                        }
                     }
                 }
-            }
-            return FindLeafRecursive(c, ref getNextKey);
+                //return FindLeafRecursive(c, ref getNextKey);
+                rootNode = c;
+            } while (true);
         }
 
-        private NodeFindResult FindNodeRecursive(NodeBase rootNode, ref TKeyEnum getNextKey)
+        private NodeFindResult FindNodeRecursive(NodeBase rootNode0, ref TKeyEnum getNextKey)
         {
-            var key = getNextKey.GetNextKeyElement();
-            if (!key.IsPresent)
+            var rootNode = rootNode0;
+            do
             {
-                return new NodeFindResult()
+                if (rootNode == null)
                 {
-                    Node = rootNode,
-                    FullEquality = true,
-                    LastKey = key,
-                    RangeRead = 0,
-                    Split = false
-                };
-            }
-            if (!rootNode.Children.ContainsKey(key.Element))
-            {
-                return new NodeFindResult()
-                {
-                    Node = rootNode,
-                    FullEquality = false,
-                    LastKey = key,
-                    RangeRead = 0,
-                    Split = false
-                };
-            }
-            var c = rootNode.Children[key.Element];
-            if (c is Node n)
-            {
-                int cnt = 0;
-                foreach (var kr in n.KeyRange)
-                {
-                    var key2 = getNextKey.GetNextKeyElement();
-                    if (!key2.IsPresent || _comparer.Compare(key2.Element, kr) != 0)
+                    return new NodeFindResult()
                     {
-                        return new NodeFindResult()
-                        {
-                            Node = c,
-                            FullEquality = false,
-                            RangeRead = cnt,
-                            LastKey = key2,
-                            Split = true
-                        };
-                    }
-                    cnt++;
+                        Node = null,
+                        FullEquality = false,
+                        LastKey = MaybeKeyElement<TKeyElement>.Empty(),
+                        RangeRead = 0,
+                        Split = false
+                    };
                 }
-            }
-            return FindNodeRecursive(c, ref getNextKey);
+                var isPresent = getNextKey.GetNextKeyElement(out var key);
+                if (!isPresent)
+                {
+                    return new NodeFindResult()
+                    {
+                        Node = rootNode,
+                        FullEquality = true,
+                        LastKey = key,
+                        RangeRead = 0,
+                        Split = false
+                    };
+                }
+                Node c;                
+                if (!rootNode.Children.TryGetValue(key, out c))
+                {
+                    return new NodeFindResult()
+                    {
+                        Node = rootNode,
+                        FullEquality = false,
+                        LastKey = key,
+                        RangeRead = 0,
+                        Split = false
+                    };
+                }
+                if (c is Node n)
+                {
+                    int cnt = 0;
+                    //foreach (var kr in n.KeyRange)
+                    for (var kri = 0; kri < n.KeyRange.Count; kri++)
+                    {
+                        var kr = n.KeyRange[kri];
+                        var isPresent2 = getNextKey.GetNextKeyElement(out var key2);
+                        if (!isPresent2 || _comparer.Compare(key2, kr) != 0)
+                        {
+                            return new NodeFindResult()
+                            {
+                                Node = c,
+                                FullEquality = false,
+                                RangeRead = cnt,
+                                LastKey = key2,
+                                Split = true
+                            };
+                        }
+                        cnt++;
+                    }
+                }
+                //return FindNodeRecursive(c, ref getNextKey);
+                rootNode = c;
+            } while (true);
         }
 
         private struct NodeFindResult
@@ -374,13 +403,16 @@ namespace Ipatov.DataStructures
         {
             protected readonly TComparer Comparer;
 
-            public SortedDictionary<TKeyElement, Node> Children { get; protected set; }
+            protected static IDictionary<TKeyElement, Node> DictionaryFactory(TComparer comparer) =>
+                new BinarySortedListDictionary<TKeyElement,Node,TComparer>(comparer);
+
+            public IDictionary<TKeyElement, Node> Children { get; protected set; }
 
             public LeafNode LeafNode;
 
             public NodeBase(TComparer comparer)
             {
-                Children = new SortedDictionary<TKeyElement, Node>(comparer);
+                Children = DictionaryFactory(comparer);
                 Comparer = comparer;
             }
 
@@ -486,7 +518,7 @@ namespace Ipatov.DataStructures
                     else if (newNode == null)
                     {
                         var savedChildren = Children;
-                        Children = new SortedDictionary<TKeyElement, Node>(Comparer);
+                        Children = DictionaryFactory(Comparer);
                         newNode = AddNode(oldRange[i]);
                         newNode.Children = savedChildren;
                         foreach (var c in savedChildren)

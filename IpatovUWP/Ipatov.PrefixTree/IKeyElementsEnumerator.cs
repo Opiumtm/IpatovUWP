@@ -10,6 +10,6 @@
         /// Get next key element.
         /// </summary>
         /// <returns>"Maybe" key element.</returns>
-        MaybeKeyElement<TKeyElement> GetNextKeyElement();
+        bool GetNextKeyElement(out TKeyElement element);
     }
 }
